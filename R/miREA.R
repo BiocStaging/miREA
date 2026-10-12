@@ -45,7 +45,10 @@
 
 
 
-#' @return A list for the enrichment result, contains result, time, valid methods, and parameter.
+#' @return A [miREAResult-class] object containing the per-method result tables
+#' (`result`), per-method elapsed time (`time`), the methods that completed
+#' without error (`valid_methods`), and the call parameters (`parameter`).
+#' Supports `$` access to these four fields for backward compatibility.
 #' @examples
 #' data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
 #' data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI); data(toy_background_GGI)
@@ -320,6 +323,6 @@ miREA <- function(methods, input_data, background = NULL,
   message("\nmiREA analysis have finished!...")
   message("=== End time: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " ===")
 
-  return(list(result = all_result, time = time, valid_methods = names(all_result),
-              parameter = list(method = methods, n_pathway = n_pathway, minSize = minSize, maxSize = maxSize, pvalueType = pvalueType, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, iter = iter, ncores = ncores)))
+  miREAResult(result = all_result, time = time, valid_methods = names(all_result),
+              parameter = list(method = methods, n_pathway = n_pathway, minSize = minSize, maxSize = maxSize, pvalueType = pvalueType, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, iter = iter, ncores = ncores))
 }

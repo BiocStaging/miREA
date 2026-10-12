@@ -67,7 +67,10 @@ Our recommendation is to specify different nodes for each method. E.g., list(Edg
 If NULL, unparallel computing will be used.}
 }
 \value{
-A list for the enrichment result, contains result, time, valid methods, and parameter.
+A [miREAResult-class] object containing the per-method result tables
+(`result`), per-method elapsed time (`time`), the methods that completed
+without error (`valid_methods`), and the call parameters (`parameter`).
+Supports `$` access to these four fields for backward compatibility.
 }
 \description{
 The main entry point for miREA, implementing four node-based methods and

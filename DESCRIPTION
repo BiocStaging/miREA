@@ -26,6 +26,7 @@ Roxygen: list(markdown = FALSE)
 Depends:
     R (>= 4.6.0)
 Imports:
+    BiocGenerics,
     ComplexHeatmap,
     circlize,
     clusterProfiler,

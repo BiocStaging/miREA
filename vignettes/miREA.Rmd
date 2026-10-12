@@ -174,11 +174,26 @@ result <- miREA(
 result$valid_methods
 ```
 
+`miREA()` returns a `miREAResult` object: a lightweight S4 container for the
+per-method result tables, elapsed times, and call parameters, with `$` access
+kept for the four fields above for convenience.
+
+```{r show-result-overview}
+result
+```
+
 `result$result` is a named list with one data.frame per method. For example,
 the `TG_ORA` result:
 
 ```{r show-result}
 head(result$result$TG_ORA)
+```
+
+All per-method results can also be flattened into a single dataframe (with a
+`method` column) via `as.data.frame()`:
+
+```{r show-result-flat}
+head(as.data.frame(result))
 ```
 
 Note: `pvalueCutoff = 1` is used throughout this vignette purely so every
