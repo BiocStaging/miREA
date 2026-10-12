@@ -325,7 +325,7 @@ get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
       } else {
         dict[, normratio := NA_real_]
       }
-      dict[, `:=`( #`:=`表示修改多个列，:=是只修改一个列
+      dict[, `:=`( # `:=`() form modifies multiple columns; infix `:=` modifies a single column
         strength = cor * normratio,
         MGI = paste0(miRNA, ":", gene)
       )]

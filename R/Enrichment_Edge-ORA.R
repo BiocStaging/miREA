@@ -74,7 +74,6 @@ Edge_ORA <- function(DEMGI, background = NULL, pathway, pAdjMethod = "BH", pvalu
   ora_result <- as.data.frame(ora) %>% rename(pathway = ID, padj = p.adjust, p_value = pvalue)
   message("  Edge-ORA analysis have finished! ")
 
-  #class(ora_result) = "Edge_ORA"
   return(ora_result) # a dataframe
 }
 

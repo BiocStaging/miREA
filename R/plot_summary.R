@@ -163,7 +163,7 @@ plot_pca <- function(result, fill_col){
   pca_scores$methods <- factor(methods) # , levels = methods
   pca_scores$shape_group <- ifelse(grepl("Edge_", pca_scores$methods), "Edge", "Other")
   shape_values <- ifelse(grepl("Edge_", methods), 16, 17)
-  names(shape_values) <- methods  # 与颜色命名对应
+  names(shape_values) <- methods
 
   pca_plot <- ggplot(
     pca_scores,

@@ -143,8 +143,10 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     ungroup() %>% arrange(desc(n_DE)) %>%
     slice_head(n = n_keep) %>%
     pull(miRNA)
-  #包含在当前通路中的gene与miRNA组成的MGI中，差异表达MGI的个数最多的前n_keep个。
-  # 即，gene必须包含在当前all_paths中，miRNA不一定要差异表达，但是只有当差异表达miRNA不足n_keep个时才会被画入图中（意味着没有DEMGI，因为DEMGI的前提时miRNA差异表达）
+  # Among the MGIs formed by genes/miRNAs within the current pathway, take the top n_keep
+  # by number of DE MGIs. I.e. the gene must be in the current all_paths; the miRNA need not
+  # be DE, but is only drawn when there are fewer than n_keep DE miRNAs (meaning no DEMGI
+  # exists for it, since a DEMGI requires a DE miRNA).
 
   MGIList <- MGIList %>% filter(miRNA %in% top_miRNA)
 
@@ -155,7 +157,7 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     mutate(row_number = row_number()) %>%
     filter(gene_count <= 10 | row_number <= 10) %>%
     ungroup()
-  # 如果一个miRNA调控超过10个基因，只保留strength最小的前10个
+  # if a miRNA regulates more than 10 genes, keep only the 10 with the smallest strength
   unique_gene <- unique(MGIList$gene)
 
   #### 1.4 gene bottom annotation: gene_anno dataframe ----
@@ -271,7 +273,7 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
       annotation_name_rot = 90,
       annotation_name_offset = unit(-3, "mm"),
       annotation_label = list(
-        mir_annot_flag = colnames(mir_anno_df)          # 使用 mir_annot 的列名
+        mir_annot_flag = colnames(mir_anno_df)
       ),
       show_legend = FALSE
     )
@@ -547,7 +549,7 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
       show_annotation_name = TRUE,
       annotation_name_rot = 90,
       annotation_name_side = "top",
-      annotation_width = unit(c(1, 1), "cm")  # 每列宽度设置为1cm
+      annotation_width = unit(c(1, 1), "cm")
     )
   )
 
@@ -615,14 +617,13 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
   n_keep <- min(n_mir, n_total)
   unique_mir <- top_miRNA[seq_len(n_keep)]
   MGI <- dict_DEMGI %>% filter(miRNA %in% unique_mir)
-  # only remain maximum 5 TGs for one miRNA
+  # if a miRNA has more than 5 target genes, keep only the 5 with the smallest strength
   MGI <- MGI %>% group_by(miRNA) %>%
     arrange(strength) %>%
     mutate(gene_count = n_distinct(gene)) %>%
     mutate(row_number = row_number()) %>%
     filter(gene_count <= 5 | row_number <= 5) %>%
     ungroup()
-  #如果一个miRNA有多于5个target gene，只保留strength值最小的五个
   unique_gene <- unique(MGI$gene)
 
   MGI <- MGI %>% mutate(sign = ifelse(strength > 0, "pos", "neg"), flow_value = 1)
@@ -658,7 +659,7 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
 
   gene_flow_from_miR <- df_mir_gene_long %>%
     filter(Demographic == "gene") %>%
-    group_by(stratum) %>%  # stratum 是 gene
+    group_by(stratum) %>%
     summarise(total_flow = sum(flow_value), .groups = "drop") %>%
     rename(gene = stratum)
   gene_path_counts <- df_gene_path_long %>%
@@ -672,17 +673,14 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
   df_gene_path_long <- df_gene_path_long %>%
     left_join(gene_info %>% select(gene, gene_flow_value = flow_value),
               by = c("stratum" = "gene"))
-  # 提取 pathway 信息
   pathway_info <- df_gene_path_long %>%
     filter(Demographic == "pathway") %>%
     select(alluvium, pathway = stratum)
 
-  # 提取 gene 节点及其 flow_value
   gene_info_per_edge <- df_gene_path_long %>%
     filter(Demographic == "gene") %>%
     select(alluvium, gene = stratum, gene_flow_value)
 
-  # 连接 gene → pathway 的边
   pathway_flow <- pathway_info %>%
     left_join(gene_info_per_edge, by = "alluvium") %>%
     group_by(pathway) %>%
@@ -711,7 +709,7 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
   miRNA_fill_df <- miRNA_fill_df %>%
     mutate(fill_color = col_mir_fc(mirLogFC))
 
-  # gene: geneLogFC 映射为浅蓝 → 浅粉
+  # gene: geneLogFC mapped light-blue (down) -> white -> light-pink (up)
   col_gene_fc <- colorRamp2(c(-gene_max,0,gene_max),c("#add8e6",  "white", "#ffb6c1"))
   gene_fill_df <- gene_fill_df %>%
     mutate(fill_color = col_gene_fc(geneLogFC))
@@ -758,7 +756,7 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
                   alluvium = alluvium,
                   y = flow_value,
                   # linetype = sign,
-                  fill = strength),   # <- 使用 strength 映射颜色
+                  fill = strength),
               stat = ggalluvial::StatAlluvium,
               color = "purple", #"#b266cc",# "black",
               alpha = 0.7,
@@ -779,7 +777,7 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
                   fill = stratum,
                   y = flow_value
               ),
-              color = "black",   # gene-pathway 保持黑色边框
+              color = "black",
               stat = ggalluvial::StatAlluvium,
               alpha = 0.7,
               aes.flow = "forward") +
@@ -790,7 +788,6 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
     geom_stratum(data = df_gene_path_long,
                  aes(x = Demographic, stratum = stratum, y = flow_value, fill = fill_color)) + #
     scale_x_discrete(limits = c("miRNA", "gene", "pathway"), expand = c(0, 0), position = "bottom") +
-    # 可选 label
     geom_text(data = df_mir_gene_long,
               aes(x = Demographic, stratum = stratum, label = after_stat(stratum), y = flow_value), #
               stat = ggalluvial::StatStratum, size = 3, color = "black") + # stringr::str_wrap(after_stat(stratum), width = length(gene_order)*0.3)

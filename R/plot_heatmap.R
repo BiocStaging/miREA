@@ -138,8 +138,10 @@ plot_heatmap <- function(method, result, input_data, n_mir_heatmap = 10, n_pathw
     ungroup() %>% arrange(desc(n_DE)) %>%
     slice_head(n = n_keep) %>%
     pull(miRNA)
-  #包含在当前通路中的gene与miRNA组成的MGI中，差异表达MGI的个数最多的前n_keep个。
-  # 即，gene必须包含在当前all_paths中，miRNA不一定要差异表达，但是只有当差异表达miRNA不足n_keep个时才会被画入图中（意味着没有DEMGI，因为DEMGI的前提时miRNA差异表达）
+  # Among the MGIs formed by genes/miRNAs within the current pathway, take the top n_keep
+  # by number of DE MGIs. I.e. the gene must be in the current all_paths; the miRNA need not
+  # be DE, but is only drawn when there are fewer than n_keep DE miRNAs (meaning no DEMGI
+  # exists for it, since a DEMGI requires a DE miRNA).
 
   MGIList <- MGIList %>% filter(miRNA %in% top_miRNA)
 
@@ -150,7 +152,7 @@ plot_heatmap <- function(method, result, input_data, n_mir_heatmap = 10, n_pathw
     mutate(row_number = row_number()) %>%
     filter(gene_count <= 10 | row_number <= 10) %>%
     ungroup()
-  # 如果一个miRNA调控超过10个基因，只保留strength最小的前10个
+  # if a miRNA regulates more than 10 genes, keep only the 10 with the smallest strength
   unique_gene <- unique(MGIList$gene)
 
   #### 1.4 gene bottom annotation: gene_anno dataframe ----
@@ -265,7 +267,7 @@ plot_heatmap <- function(method, result, input_data, n_mir_heatmap = 10, n_pathw
       annotation_name_rot = 90,
       annotation_name_offset = unit(-3, "mm"),
       annotation_label = list(
-        mir_annot_flag = colnames(mir_anno_df)          # 使用 mir_annot 的列名
+        mir_annot_flag = colnames(mir_anno_df)
       ),
       show_legend = FALSE
     )
@@ -517,7 +519,7 @@ plot_heatmap <- function(method, result, input_data, n_mir_heatmap = 10, n_pathw
       show_annotation_name = TRUE,
       annotation_name_rot = 90,
       annotation_name_side = "top",
-      annotation_width = unit(c(1, 1), "cm")  # 每列宽度设置为1cm
+      annotation_width = unit(c(1, 1), "cm")
     )
   )
 

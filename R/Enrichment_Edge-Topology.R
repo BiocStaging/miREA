@@ -137,7 +137,6 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
     arrange(padj, decrease = FALSE)
 
   message("  Edge-Topology analysis have finished!")
-  # class(result) <- "Edge_Topology"
   return(result)
 }
 
@@ -413,6 +412,5 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, ct
     #"MGI_list" = paste(MGI_list, collapse = "/"),
     stringsAsFactors = FALSE
   )
-  # class(result) <- "Edge_Topology_single"
   return(result)
 }

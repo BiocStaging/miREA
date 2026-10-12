@@ -106,7 +106,6 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
   setDT(pathway)
   setDT(MGI2D)
 
-  # 按 pathway 大小分类
   pathway_sizes <- table(pathway$pathway)
   unique_sizes <- sort(unique(pathway_sizes))
 

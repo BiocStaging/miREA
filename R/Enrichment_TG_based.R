@@ -46,7 +46,6 @@ TG_ORA <- function(TG, background = NULL, pathway, pAdjMethod = "BH", pvalueCuto
   ## if use ora@result, all pathways with valid DEG will remain, no matter whether the pvalue pass the Cutoff threshold.
   message("  TG-ORA analysis have finished! ")
 
-  # class(ora_result) = "TG_ORA"
   return(ora_result) # a dataframe
 
 }
@@ -107,6 +106,5 @@ TG_Score <- function(geneList, pathway, pvalueType = "std", pAdjMethod = "BH",  
 
   message("  TG-Score analysis have finished!")
 
-  # class(gsea_result) = "TG_Score"
   return(gsea_result)
 }

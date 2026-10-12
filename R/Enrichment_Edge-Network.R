@@ -216,7 +216,7 @@ Edge_Network <- function(DEMGI,
     delta <- 1e-6
     max_steps <- 100
     p <- seed.vec
-    new_p <- p # 预分配，避免重复创建对象
+    new_p <- p # pre-allocate, to avoid repeatedly creating the object
     diff_val <- Inf
     step <- 0
 
@@ -233,7 +233,7 @@ Edge_Network <- function(DEMGI,
 
       if (diff_val < delta || step >= max_steps) break
 
-      # swap 引用而不是复制（就地交换引用避免两份大对象）
+      # swap references instead of copying (in-place reference swap avoids holding two large objects)
       tmp <- p
       p <- new_p
       new_p <- tmp
@@ -315,11 +315,11 @@ Edge_Network <- function(DEMGI,
     dimnames = list(pathways, edges)
   )
 
-  # 对每列 permutation 做矩阵乘法
+  # matrix-multiply across all permutation columns at once
   perm_scores <- perm_scores[match(colnames(P), rownames(perm_scores)), , drop = FALSE]
   perm_result_mat <- P %*% perm_scores  # pathways x iterations
 
-  # 转回 data.table
+  # convert back to data.table
   perm_coo <- Matrix::summary(perm_result_mat)  # i,j,x
   perm_result <- data.table(
     pathway = rownames(perm_result_mat)[perm_coo$i],

@@ -92,7 +92,7 @@ miREA <- function(methods, input_data, background = NULL,
     stop("input_data is missing the 'data' component.")
   }
   missing_data <- methods[!methods %in% names(input_data$data)]
-  if (length(missing_data) > 1){ #####################################需要改成>0
+  if (length(missing_data) > 0){
     stop("The following methods are missing in input_data$data: ",
          paste(missing_data, collapse = ", "))
   }

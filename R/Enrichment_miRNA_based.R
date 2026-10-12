@@ -64,7 +64,6 @@ MiR_ORA <- function(DEmiR, background = NULL, pathway, pAdjMethod = "BH", pvalue
   ora_result <- as.data.frame(ora) %>% rename(pathway = ID, padj = p.adjust, p_value = pvalue)
   message("  MiR-ORA analysis have finished! ")
 
-  # class(ora_result) = "MiR_ORA"
   return(ora_result) # a dataframe
 
 }
@@ -123,6 +122,5 @@ MiR_Score <- function(miRList, pathway, pvalueType = "std", pAdjMethod = "BH", p
   # gsea_result <- do.call(data.frame, gsea_result)
   message("  MiR-Score analysis have finished!")
 
-  #class(gsea_result) = "MiR_Score"
   return(gsea_result)
 }

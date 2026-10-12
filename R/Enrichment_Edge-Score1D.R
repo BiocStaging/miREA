@@ -58,6 +58,5 @@ Edge_Score1D <- function(MGIList,  pathway, pvalueType = "neg", pAdjMethod = "BH
 
   message("  Edge-Score1D analysis have finished!")
 
-  # class(gsea_result) = "Edge_Score1D"
   return(gsea_result)
 }
