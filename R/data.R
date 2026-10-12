@@ -1,0 +1,48 @@
+#' Toy BLCA example data for miREA
+#'
+#' A small, self-contained example dataset derived from the real BLCA
+#' (bladder urothelial carcinoma) hallmark-pathway data used in the miREA
+#' manuscript. It is built around three MSigDB hallmark pathways
+#' ("REPLICATIVE IMMORTALITY" as the signal pathway, "REPROGRAMMING ENERGY
+#' METABOLISM" and "GENOME INSTABILITY" as contrast pathways), subsetted to
+#' a small miRNA/gene universe and 200 TCGA samples (chosen for enough
+#' statistical power that every miREA method, including the edge-based
+#' methods' stricter significance filters, returns real, non-empty results)
+#' so every exported function in the package can run quickly on real (not
+#' synthetic) data. For the full datasets used in the manuscript, see the
+#' Zenodo deposit at
+#' \url{https://zenodo.org/records/18803209}.
+#'
+#' @format \describe{
+#'   \item{toy_pathway}{A data.frame with columns `pathway`, `gene`: hallmark
+#'     pathway-gene membership for the 3 pathways above.}
+#'   \item{toy_gene_DEdata}{A data.frame with columns `gene`, `log2FoldChange`,
+#'     `stat`, `padj`: differential expression results for the gene universe.}
+#'   \item{toy_mir_DEdata}{A data.frame with columns `miRNA`, `log2FoldChange`,
+#'     `stat`, `padj`: differential expression results for the miRNA universe.}
+#'   \item{toy_gene_mat}{A gene-by-sample expression matrix (data.frame, genes
+#'     as rownames), 200 TCGA samples.}
+#'   \item{toy_mir_mat}{A miRNA-by-sample expression matrix (data.frame,
+#'     miRNAs as rownames), the same 200 TCGA samples as `toy_gene_mat`.}
+#'   \item{toy_background_MGI}{A data.frame with columns `miRNA`, `gene`:
+#'     curated miRNA-gene interactions restricted to the toy universe.}
+#'   \item{toy_background_GGI}{A data.frame with columns `source_genesymbol`,
+#'     `target_genesymbol`, `interact`: Omnipath gene-gene interactions
+#'     restricted to the toy gene universe.}
+#' }
+#' @source Derived from TCGA BLCA data and MSigDB hallmark gene sets, as
+#'   processed for the miREA manuscript
+#'   (\doi{10.64898/2026.02.27.708509}).
+#' @name miREA_example_data
+#' @aliases toy_pathway toy_gene_DEdata toy_mir_DEdata toy_gene_mat toy_mir_mat toy_background_MGI toy_background_GGI
+#' @docType data
+#' @keywords datasets
+#' @examples
+#' data(toy_pathway)
+#' data(toy_gene_DEdata)
+#' data(toy_mir_DEdata)
+#' data(toy_gene_mat)
+#' data(toy_mir_mat)
+#' data(toy_background_MGI)
+#' data(toy_background_GGI)
+NULL

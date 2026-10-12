@@ -1,0 +1,59 @@
+Package: miREA
+Title: Network-Based Edge-Centric MicroRNA-Oriented Enrichment Analysis
+Version: 0.99.0
+Authors@R: c(
+    person("Zhesi", "Zhang", role = c("aut", "cre"),
+           email = "zhesizhang07@gmail.com",
+           comment = c(ORCID = "0009-0006-9869-9455")),
+    person("Xin", "Lai", role = "aut",
+           comment = c(ORCID = "0000-0003-4913-5822")))
+Description: miREA performs microRNA-oriented enrichment analysis by modeling
+    miRNA-gene interaction (MGI) networks directly, rather than collapsing
+    them to miRNA- or gene-level sets. It implements four node-based methods
+    and five edge-based methods spanning over-representation, scoring-based,
+    topology-aware, and network-propagation approaches, using
+    expression-informed MGI edge scores to characterize regulatory strength.
+    The package also provides heatmap, Sankey, and summary visualizations to
+    explore miRNA-gene-pathway regulatory mechanisms discovered by the
+    enrichment results.
+License: Artistic-2.0
+URL: https://github.com/laixn/miREA
+BugReports: https://github.com/laixn/miREA/issues
+biocViews: miRNA, GeneSetEnrichment, Network, NetworkEnrichment, Pathways, SystemsBiology
+Encoding: UTF-8
+LazyData: false
+Roxygen: list(markdown = FALSE)
+Depends:
+    R (>= 4.6.0)
+Imports:
+    ComplexHeatmap,
+    circlize,
+    clusterProfiler,
+    data.table,
+    dplyr,
+    ggalluvial,
+    ggnewscale,
+    ggplot2,
+    grDevices,
+    grid,
+    igraph,
+    Matrix,
+    methods,
+    miRBaseConverter,
+    parallel,
+    patchwork,
+    reshape2,
+    scales,
+    stats,
+    stringr,
+    tibble,
+    utils,
+    V8
+Suggests:
+    BiocStyle,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

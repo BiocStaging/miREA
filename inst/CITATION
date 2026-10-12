@@ -1,0 +1,15 @@
+citHeader("To cite miREA in publications, please use:")
+
+bibentry(
+  bibtype  = "Article",
+  title    = "miREA: a network-based tool for microRNA-oriented enrichment analysis",
+  author   = c(person("Zhesi", "Zhang"), person("Xin", "Lai")),
+  journal  = "bioRxiv",
+  year     = "2026",
+  doi      = "10.64898/2026.02.27.708509",
+  textVersion = paste(
+    "Zhesi Zhang, Xin Lai (2026).",
+    "miREA: a network-based tool for microRNA-oriented enrichment analysis.",
+    "bioRxiv. doi:10.64898/2026.02.27.708509"
+  )
+)
