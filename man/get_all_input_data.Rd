@@ -20,7 +20,7 @@ get_all_input_data(
 \arguments{
 \item{methods}{compulsory, see default.method_list for all supportive methods. You could either input one method, or a vector contains several methods you want to try.}
 
-\item{pathway}{compulsory. It should be a two-column pathway, containing pathway and gene.}
+\item{pathway}{compulsory. It should be a two-column pathway, containing pathway and gene, or a GSEABase GeneSetCollection object.}
 
 \item{mir_DEdata}{compulsory, should be a four-column dataframe, containing miRNA, log2FC, stat, padj}
 
@@ -32,9 +32,9 @@ get_all_input_data(
 
 \item{GGI_source}{optional, select from "Omnipath" or "Reactome".if you don't have specified background_GGI and neither GGI_source. The default Omnipath will be used.}
 
-\item{gene_mat}{optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be raw gene expression matrix, where each row is a gene, and each column represents a sample.}
+\item{gene_mat}{optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw gene expression matrix (each row a gene, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.}
 
-\item{mir_mat}{optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be raw miRNA expression matrix, where each row is a miRNA, and each column represents a sample.}
+\item{mir_mat}{optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw miRNA expression matrix (each row a miRNA, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.}
 
 \item{scoreFun}{optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default.scoreFun for all supportive methods.}
 }

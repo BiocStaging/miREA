@@ -40,6 +40,24 @@ with `get_all_input_data()`, run the selected methods with `miREA()`, and
 visualize results with `plot_summary()`, `plot_heatmap()`, or
 `plot_heatmap_sankey()`.
 
+## Relation to existing packages
+
+Several Bioconductor/CRAN packages address related but distinct questions.
+`r BiocStyle::Biocpkg("clusterProfiler")` performs over-representation and
+gene set enrichment analysis, but for gene enrichment analysis: it tests a 
+list of genes against pathway gene sets, with no special focus on miRNAs. 
+`r BiocStyle::Biocpkg("SPIA")` incorporates pathway topology but operates 
+purely on gene-level differential expression, with no miRNA layer.
+`r BiocStyle::Biocpkg("multiMiR")` and similar miRNA-target database
+packages retrieve curated or predicted miRNA-gene interactions but do not
+provide an enrichment/significance-testing framework over them. miREA is, to our knowledge, the only package that
+models miRNA-gene interactions as first-class edges throughout testing
+(over-representation, scoring, topology, and network propagation alike),
+which is the gap it is designed to fill; internally its ORA and GSEA-style
+methods (`TG_ORA`, `MiR_ORA`, `Edge_ORA`, `TG_Score`, `MiR_Score`,
+`Edge_Score1D`) reuse `r BiocStyle::Biocpkg("clusterProfiler")`'s
+`enricher()`/`GSEA()` rather than reimplementing them.
+
 # Installation
 
 ```{r install, eval = FALSE}
@@ -95,6 +113,35 @@ input_data <- get_all_input_data(
   scoreFun = "rank"
 )
 names(input_data)
+```
+
+## Interoperability with standard Bioconductor classes
+
+`gene_mat`/`mir_mat` also accept a `r BiocStyle::Biocpkg("SummarizedExperiment")`
+object in place of a raw matrix/dataframe (the first assay is used), and
+`pathway` accepts a `r BiocStyle::Biocpkg("GSEABase")` `GeneSetCollection` in
+place of the two-column dataframe. This lets miREA plug directly into
+analyses that already represent expression data and gene sets in these
+standard classes, instead of requiring a manual conversion step.
+
+```{r interop-demo}
+library(SummarizedExperiment)
+library(GSEABase)
+
+gene_se <- SummarizedExperiment(assays = list(expr = as.matrix(toy_gene_mat)))
+mir_se <- SummarizedExperiment(assays = list(expr = as.matrix(toy_mir_mat)))
+pathway_gsc <- GeneSetCollection(Map(function(genes, name) GeneSet(genes, setName = name),
+  split(toy_pathway$gene, toy_pathway$pathway),
+  names(split(toy_pathway$gene, toy_pathway$pathway))
+))
+
+input_data_bioc <- get_all_input_data(
+  methods = "Edge_ORA", pathway = pathway_gsc,
+  mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
+  background_MGI = toy_background_MGI,
+  gene_mat = gene_se, mir_mat = mir_se
+)
+identical(input_data_bioc$data$Edge_ORA, input_data$data$Edge_ORA)
 ```
 
 # Step 2: Run enrichment analysis

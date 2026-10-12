@@ -106,3 +106,23 @@ combine_parallel <- function(res) {
   }
   obj
 }
+
+#' @noRd
+coerce_expr_mat <- function(x) {
+  if (is.null(x) || !methods::is(x, "SummarizedExperiment")) return(x)
+  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+    stop("Package 'SummarizedExperiment' is required to pass a SummarizedExperiment as gene_mat/mir_mat.")
+  }
+  as.data.frame(SummarizedExperiment::assay(x))
+}
+
+#' @noRd
+coerce_pathway <- function(pathway) {
+  if (!methods::is(pathway, "GeneSetCollection")) return(pathway)
+  if (!requireNamespace("GSEABase", quietly = TRUE)) {
+    stop("Package 'GSEABase' is required to pass a GeneSetCollection as pathway.")
+  }
+  do.call(rbind, lapply(pathway, function(gs) {
+    data.frame(pathway = GSEABase::setName(gs), gene = GSEABase::geneIds(gs), stringsAsFactors = FALSE)
+  }))
+}

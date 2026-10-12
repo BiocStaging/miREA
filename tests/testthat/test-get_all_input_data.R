@@ -41,3 +41,30 @@ test_that("get_all_input_data() works for a single method without the full pipel
   expect_true(is.character(input_data$data$TG_ORA))
   expect_true(length(input_data$data$TG_ORA) > 0)
 })
+
+test_that("get_all_input_data() accepts SummarizedExperiment and GeneSetCollection inputs", {
+  skip_if_not_installed("SummarizedExperiment")
+  skip_if_not_installed("GSEABase")
+
+  gene_se <- SummarizedExperiment::SummarizedExperiment(assays = list(expr = as.matrix(toy_gene_mat)))
+  mir_se <- SummarizedExperiment::SummarizedExperiment(assays = list(expr = as.matrix(toy_mir_mat)))
+  pathway_gsc <- GSEABase::GeneSetCollection(Map(function(genes, name) {
+    GSEABase::GeneSet(genes, setName = name)
+  }, split(toy_pathway$gene, toy_pathway$pathway), names(split(toy_pathway$gene, toy_pathway$pathway))))
+
+  input_data_std <- get_all_input_data(
+    methods = default.method_list, pathway = toy_pathway,
+    mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
+    background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
+    gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"
+  )
+  input_data_bioc <- get_all_input_data(
+    methods = default.method_list, pathway = pathway_gsc,
+    mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
+    background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
+    gene_mat = gene_se, mir_mat = mir_se, scoreFun = "rank"
+  )
+
+  expect_equal(input_data_bioc$dict_MGI, input_data_std$dict_MGI)
+  expect_equal(input_data_bioc$data$Edge_Topology, input_data_std$data$Edge_Topology)
+})

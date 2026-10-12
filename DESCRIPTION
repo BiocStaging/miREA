@@ -51,8 +51,10 @@ Imports:
     V8
 Suggests:
     BiocStyle,
+    GSEABase,
     knitr,
     rmarkdown,
+    SummarizedExperiment,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3

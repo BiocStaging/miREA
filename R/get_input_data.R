@@ -7,14 +7,14 @@
 #' Functions to generate input data for miREA, based on the original expression and differential expression results for miRNAs and genes.
 #'
 #' @param methods compulsory, see default.method_list for all supportive methods. You could either input one method, or a vector contains several methods you want to try.
-#' @param pathway compulsory. It should be a two-column pathway, containing pathway and gene.
+#' @param pathway compulsory. It should be a two-column pathway, containing pathway and gene, or a GSEABase GeneSetCollection object.
 #' @param mir_DEdata compulsory, should be a four-column dataframe, containing miRNA, log2FC, stat, padj
 #' @param gene_DEdata optional, except for TG-ORA, MiR-ORA, and MiR-Score methods, should be a four-column dataframe, containing gene, log2FC, stat, padj
 #' @param background_MGI required for MiR_ and Edge_ methods. It should be either a character vector in the format of [miRNA]:[gene], or a two-column dataframe, containing miRNA gene. miREA does not ship a bundled default.
 #' @param background_GGI optional, it should be a two-column data frame that contains source gene and target gene. Combined with *GGI_source*. If NULL, we would use GGI_source to determine the background GGIs.
 #' @param GGI_source optional, select from "Omnipath" or "Reactome".if you don't have specified background_GGI and neither GGI_source. The default Omnipath will be used.
-#' @param gene_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be raw gene expression matrix, where each row is a gene, and each column represents a sample.
-#' @param mir_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be raw miRNA expression matrix, where each row is a miRNA, and each column represents a sample.
+#' @param gene_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw gene expression matrix (each row a gene, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.
+#' @param mir_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw miRNA expression matrix (each row a miRNA, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.
 #' @param scoreFun optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default.scoreFun for all supportive methods.
 #' @note gene_mat and mir_mat should have same sample name format. If the number of shared samples below 50 % of the minimum of gene samples and miRNA samples, a warning would happen to remind you recheck them.
 #' @return A list that contains all the data formats needed for miREA.
@@ -46,6 +46,9 @@ get_all_input_data <- function(methods, pathway,
                                gene_mat = NULL, mir_mat = NULL,
                                scoreFun = NULL){
   message("Generate all input data...")
+  pathway <- coerce_pathway(pathway)
+  gene_mat <- coerce_expr_mat(gene_mat)
+  mir_mat <- coerce_expr_mat(mir_mat)
   sum_TG <- sum(grepl("TG_", methods))
   sum_MiR <- sum(grepl("MiR_", methods))
   sum_Edge <- sum(grepl("Edge_", methods))
