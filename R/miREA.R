@@ -129,13 +129,14 @@ miREA <- function(methods, input_data, background = NULL,
 
   # check background
   if (!is.null(background)){
-    if(!is.list(background) && length(targets) > 1){
-      stop("You have selected methods contain multiple targets, please specify background for all the targets.")
-    } else {
-      if (!is.list(background) || any(!targets %in% names(background))){
-        stop("The following background targets are missing in background: ",
-             paste(targets[!targets %in% names(background)], collapse = ", "))
+    if (!is.list(background)){
+      if (length(targets) > 1){
+        stop("You have selected methods contain multiple targets, please specify background for all the targets.")
       }
+      background <- setNames(list(background), targets)
+    } else if (any(!targets %in% names(background))){
+      stop("The following background targets are missing in background: ",
+           paste(targets[!targets %in% names(background)], collapse = ", "))
     }
   } else {
     stop("background must be supplied for the selected methods. miREA does not ship ",
@@ -219,10 +220,8 @@ miREA <- function(methods, input_data, background = NULL,
   tryCatch({
     if ("MiR_ORA" %in% methods){
       time_MiR_ORA <- system.time({
-        time_MiR_ORA <- system.time({
         result_MiR_ORA <- MiR_ORA(DEmiR = input_data$data$MiR_ORA, background = background$MiR, pathway = input_data$pathway$MiR,
                                   pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
       })
       time <- rbind(time, data.frame(method = "MiR_ORA", time = time_MiR_ORA[["elapsed"]], stringsAsFactors = FALSE))
       all_result[["MiR_ORA"]] <- result_MiR_ORA

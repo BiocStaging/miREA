@@ -67,6 +67,12 @@ test_that("Edge_Network returns enrichment results for the signal pathway", {
   expect_true("LINDGREN_BLADDER_CANCER_CLUSTER_2B" %in% res$pathway)
 })
 
+test_that("Edge_Score1D rejects invalid MGIList/pAdjMethod inputs", {
+  expect_error(Edge_Score1D(MGIList = NULL, pathway = toy_pathway), "must be entered")
+  expect_error(Edge_Score1D(MGIList = "not-numeric", pathway = toy_pathway), "must be a named number vector")
+  expect_error(Edge_Score1D(MGIList = c(a = 1), pathway = toy_pathway, pAdjMethod = "bogus"), "Invalid pAdjMethod")
+})
+
 test_that("Edge_ORA rejects an invalid pAdjMethod", {
   expect_error(
     Edge_ORA(DEMGI = "a:b", background = "a:b", pathway = toy_pathway, pAdjMethod = "bogus"),
