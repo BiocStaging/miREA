@@ -100,11 +100,7 @@ snapshot_rng_state <- function() {
 
 #' @noRd
 combine_parallel <- function(res) {
-  obj <- data.frame()
-  for (i in seq_along(res)) {
-    obj <- rbind(obj, as.data.frame(res[[i]]))
-  }
-  obj
+  dplyr::bind_rows(lapply(res, as.data.frame))
 }
 
 #' @noRd
