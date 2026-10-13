@@ -21,7 +21,7 @@ miREA(
 \item{methods}{Method used for enrichment analysis, see default_method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").}
 
 \item{input_data}{Input data list. Contains all kind of input data for all methods, including data, pathway, pathway_GGI, GGI, dict_MGI. 
-Use get_all_input_data() function to generate. You could also generate it by yourself.
+Use getAllInputData() function to generate. You could also generate it by yourself.
   input_data$data: each sub-element is named by the method, containing the input data format.
     TG_ORA: DEG, MiR_ORA: DEmiR, Edge_ORA: DEMGI, Edge_Network: DEMGI
       All of them is a character vector, containing all selected differential expressed items (genes/miRNAs/MGI)
@@ -79,7 +79,7 @@ five edge-based methods for miRNA-oriented enrichment analysis.
 \examples{
 data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
 data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI); data(toy_background_GGI)
-input_data <- get_all_input_data(
+input_data <- getAllInputData(
   methods = default_method_list, pathway = toy_pathway,
   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
   background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,

@@ -14,7 +14,7 @@ A character vector of length 2.
 }
 \description{
 Character vector of the background gene-gene interaction (GGI) sources
-supported by the `GGI_source` argument of [get_all_input_data()].
+supported by the `GGI_source` argument of [getAllInputData()].
 }
 \examples{
 default_GGI_source

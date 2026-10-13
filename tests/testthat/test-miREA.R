@@ -2,7 +2,7 @@ data(toy_pathway, toy_gene_DEdata, toy_mir_DEdata, toy_gene_mat, toy_mir_mat,
      toy_background_MGI, toy_background_GGI, package = "miREA")
 
 test_that("miREA() runs all nine methods and returns a result per method", {
-  input_data <- suppressWarnings(get_all_input_data(
+  input_data <- suppressWarnings(getAllInputData(
     methods = default_method_list, pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
@@ -30,7 +30,7 @@ test_that("miREA() runs all nine methods and returns a result per method", {
 })
 
 test_that("miREA() requires a background when none is supplied", {
-  input_data <- suppressWarnings(get_all_input_data(
+  input_data <- suppressWarnings(getAllInputData(
     methods = "TG_ORA", pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI
@@ -65,7 +65,7 @@ test_that("miREA() validates input_data structure", {
 })
 
 test_that("miREA() warns and drops invalid method names, erroring if none remain", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "TG_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )
@@ -83,7 +83,7 @@ test_that("miREA() warns and drops invalid method names, erroring if none remain
 })
 
 test_that("miREA() requires pathway_GGI/dict_MGI/GGI/MGI for topology/network methods", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "TG_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )
@@ -102,7 +102,7 @@ test_that("miREA() requires pathway_GGI/dict_MGI/GGI/MGI for topology/network me
 })
 
 test_that("miREA() validates pvalueType and ncores", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "TG_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )
@@ -131,7 +131,7 @@ test_that("miREA() validates pvalueType and ncores", {
 })
 
 test_that("miREA() accepts a plain character vector background for a single target", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "TG_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )
@@ -141,7 +141,7 @@ test_that("miREA() accepts a plain character vector background for a single targ
 })
 
 test_that("miREA() rejects a plain character vector background for multiple targets", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = c("TG_ORA", "MiR_ORA"), pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )
@@ -153,7 +153,7 @@ test_that("miREA() rejects a plain character vector background for multiple targ
 })
 
 test_that("miREA() continues running other methods after one method errors, and fills missing ncores entries", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = c("TG_ORA", "Edge_Score2D", "Edge_Topology"), pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,

@@ -36,9 +36,9 @@ The package implements:
   scoring-based, topology-aware, and network-propagation approaches.
 
 All nine methods share a common workflow: prepare method-specific input data
-with `get_all_input_data()`, run the selected methods with `miREA()`, and
-visualize results with `plot_summary()`, `plot_heatmap()`, or
-`plot_heatmap_sankey()`.
+with `getAllInputData()`, run the selected methods with `miREA()`, and
+visualize results with `plotSummary()`, `plotHeatmap()`, or
+`plotHeatmapSankey()`.
 
 ## Relation to existing packages
 
@@ -95,14 +95,14 @@ dim(toy_mir_mat)
 
 # Step 1: Prepare input data
 
-`get_all_input_data()` builds the method-specific input formats (DE gene/miRNA
+`getAllInputData()` builds the method-specific input formats (DE gene/miRNA
 lists, ranked score vectors, MGI dictionaries, GGI networks, etc.) from the raw
 expression and differential-expression tables. Here we request all nine
 methods at once; see `?default_method_list` for the full list of supported
 method names.
 
 ```{r get-input-data}
-input_data <- get_all_input_data(
+input_data <- getAllInputData(
   methods = default_method_list,
   pathway = toy_pathway,
   mir_DEdata = toy_mir_DEdata,
@@ -137,7 +137,7 @@ pathway_gsc <- GeneSetCollection(Map(function(genes, name) GeneSet(genes, setNam
   names(split(toy_pathway$gene, toy_pathway$pathway))
 ))
 
-input_data_bioc <- get_all_input_data(
+input_data_bioc <- getAllInputData(
   methods = "Edge_ORA", pathway = pathway_gsc,
   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
   background_MGI = toy_background_MGI,
@@ -149,7 +149,7 @@ identical(input_data_bioc$data$Edge_ORA, input_data$data$Edge_ORA)
 # Step 2: Run enrichment analysis
 
 `miREA()` requires a `background` for each target (`TG`, `MiR`, `Edge`) unless
-you already supplied one via `get_all_input_data()`'s `background_MGI`. miREA
+you already supplied one via `getAllInputData()`'s `background_MGI`. miREA
 does not ship a bundled default background — build one from your own
 background_MGI/background_GGI, or download the full background used in the
 manuscript from the Zenodo deposit linked above.
@@ -205,26 +205,26 @@ another threshold appropriate to your study.
 
 # Step 3: Visualize results
 
-`plot_summary()` compares results across all requested methods: positive
+`plotSummary()` compares results across all requested methods: positive
 enrichment rates, a PCA of per-method pathway rankings, pairwise overlap
 between methods, and a p-value density plot.
 
 ```{r plot-summary, fig.width = 10, fig.height = 6}
-plot_summary(result, penrichCutoff = 1)
+plotSummary(result, penrichCutoff = 1)
 ```
 
-`plot_heatmap()` and `plot_heatmap_sankey()` visualize a single edge-based
+`plotHeatmap()` and `plotHeatmapSankey()` visualize a single edge-based
 method's result as a miRNA-by-gene heatmap (optionally combined with a Sankey
 diagram showing the miRNA-gene-pathway flow). Only the five edge-based methods
 are supported, one at a time.
 
 ```{r plot-heatmap, fig.width = 8, fig.height = 8}
-plot_heatmap(method = "Edge_ORA", result = result, input_data = input_data,
+plotHeatmap(method = "Edge_ORA", result = result, input_data = input_data,
              penrichCutoff = 1)
 ```
 
 ```{r plot-sankey, fig.width = 8, fig.height = 10}
-plot_heatmap_sankey(method = "Edge_ORA", result = result, input_data = input_data,
+plotHeatmapSankey(method = "Edge_ORA", result = result, input_data = input_data,
                      penrichCutoff = 1)
 ```
 

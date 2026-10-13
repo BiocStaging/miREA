@@ -59,7 +59,7 @@ to the pathway MGI set.
 data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata)
 data(toy_gene_mat); data(toy_mir_mat)
 data(toy_background_MGI); data(toy_background_GGI)
-input_data <- get_all_input_data(
+input_data <- getAllInputData(
   methods = "Edge_Network", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
   gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI,
   background_GGI = toy_background_GGI, GGI_source = "Omnipath",

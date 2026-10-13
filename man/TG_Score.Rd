@@ -43,7 +43,7 @@ Perform target gene enrichment analysis based on whether the pathway genes are l
 }
 \examples{
 data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata); data(toy_background_MGI)
-input_data <- get_all_input_data(
+input_data <- getAllInputData(
   methods = "TG_Score", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
   gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
 )

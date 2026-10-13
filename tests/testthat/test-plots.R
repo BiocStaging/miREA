@@ -1,8 +1,8 @@
 data(toy_pathway, toy_gene_DEdata, toy_mir_DEdata, toy_gene_mat, toy_mir_mat,
      toy_background_MGI, toy_background_GGI, package = "miREA")
 
-test_that("plot_summary(), plot_heatmap(), and plot_heatmap_sankey() run without error", {
-  input_data <- suppressWarnings(get_all_input_data(
+test_that("plotSummary(), plotHeatmap(), and plotHeatmapSankey() run without error", {
+  input_data <- suppressWarnings(getAllInputData(
     methods = default_method_list, pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
@@ -24,9 +24,9 @@ test_that("plot_summary(), plot_heatmap(), and plot_heatmap_sankey() run without
   pdf(NULL)
   on.exit(dev.off(), add = TRUE)
 
-  expect_no_error(plot_summary(result, penrichCutoff = 1))
-  expect_no_error(plot_heatmap(method = "Edge_ORA", result = result, input_data = input_data,
+  expect_no_error(plotSummary(result, penrichCutoff = 1))
+  expect_no_error(plotHeatmap(method = "Edge_ORA", result = result, input_data = input_data,
                                 penrichCutoff = 1))
-  expect_no_error(plot_heatmap_sankey(method = "Edge_ORA", result = result, input_data = input_data,
+  expect_no_error(plotHeatmapSankey(method = "Edge_ORA", result = result, input_data = input_data,
                                        penrichCutoff = 1))
 })

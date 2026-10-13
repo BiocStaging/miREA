@@ -2,7 +2,7 @@ data(toy_pathway, toy_gene_DEdata, toy_mir_DEdata, toy_gene_mat, toy_mir_mat,
      toy_background_MGI, toy_background_GGI, package = "miREA")
 
 test_that("Edge_ORA, Edge_Score1D, Edge_Score2D return enrichment results for the signal pathway", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = c("Edge_ORA", "Edge_Score1D", "Edge_Score2D"), pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, gene_mat = toy_gene_mat, mir_mat = toy_mir_mat,
@@ -31,7 +31,7 @@ test_that("Edge_ORA rejects an empty DEMGI vector", {
 })
 
 test_that("Edge_Topology returns enrichment results for the signal pathway", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_Topology", pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
@@ -50,7 +50,7 @@ test_that("Edge_Topology returns enrichment results for the signal pathway", {
 })
 
 test_that("Edge_Network returns enrichment results for the signal pathway", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_Network", pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
@@ -96,7 +96,7 @@ test_that("Edge_ORA errors when all DEMGI are filtered out by the background", {
 })
 
 test_that("Edge_ORA filters DEMGI entries missing from the background with a message", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI,
     gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"
@@ -133,7 +133,7 @@ test_that("Edge_Topology errors when no MGI pairs match the background", {
 })
 
 test_that("Edge_Topology handles n_pathway=0, the iter=1 degenerate branch, and ncores>1", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_Topology", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI,
     background_GGI = toy_background_GGI, GGI_source = "Omnipath",
@@ -167,7 +167,7 @@ test_that("Edge_Topology handles n_pathway=0, the iter=1 degenerate branch, and 
 })
 
 test_that("Edge_Topology_single warns on multi-pathway input and handles PW_GGI=NULL", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_Topology", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI,
     background_GGI = toy_background_GGI, GGI_source = "Omnipath",
@@ -217,7 +217,7 @@ test_that("Edge_Score2D rejects invalid MGI2D/background inputs", {
 })
 
 test_that("Edge_Score2D handles n_pathway=0 early return and the ncores>1 parallel path", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_Score2D", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI,
     gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"
@@ -241,7 +241,7 @@ test_that("Edge_Score2D handles n_pathway=0 early return and the ncores>1 parall
 })
 
 test_that("Edge_Score2D_single warns on multi-pathway input and returns NULL for no overlap", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "Edge_Score2D", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI,
     gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"

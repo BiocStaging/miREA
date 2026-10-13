@@ -2,7 +2,7 @@ data(toy_pathway, toy_gene_DEdata, toy_mir_DEdata, toy_gene_mat, toy_mir_mat,
      toy_background_MGI, toy_background_GGI, package = "miREA")
 
 test_that("TG_ORA and TG_Score return enrichment results for the signal pathway", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = c("TG_ORA", "TG_Score"), pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI
@@ -24,7 +24,7 @@ test_that("TG_ORA rejects an empty TG vector", {
 })
 
 test_that("MiR_ORA and MiR_Score return enrichment results for the signal pathway", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = c("MiR_ORA", "MiR_Score"), pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI
@@ -73,7 +73,7 @@ test_that("MiR_ORA errors when all DEmiRs are filtered out by the background", {
 })
 
 test_that("MiR_ORA filters DEmiR entries missing from the background with a message", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "MiR_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )
@@ -89,7 +89,7 @@ test_that("MiR_ORA filters DEmiR entries missing from the background with a mess
 })
 
 test_that("MiR_ORA falls back to the miRBase background when none is supplied", {
-  input_data <- get_all_input_data(
+  input_data <- getAllInputData(
     methods = "MiR_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
   )

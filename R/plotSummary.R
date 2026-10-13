@@ -18,7 +18,7 @@
 #' data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
 #' data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI)
 #' methods <- c("TG_ORA", "TG_Score", "MiR_ORA", "MiR_Score", "Edge_ORA")
-#' input_data <- get_all_input_data(
+#' input_data <- getAllInputData(
 #'   methods = methods, pathway = toy_pathway,
 #'   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
 #'   background_MGI = toy_background_MGI,
@@ -35,9 +35,9 @@
 #'   pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
 #'   pvalueCutoff = 1
 #' )
-#' plot_summary(result, penrichCutoff = 1)
+#' plotSummary(result, penrichCutoff = 1)
 #' @export
-plot_summary <- function(result, penrichCutoff = NULL, plot_path = NULL,
+plotSummary <- function(result, penrichCutoff = NULL, plot_path = NULL,
                          fill_col = c("TG_ORA" = "#97D7F2", "TG_Score" = "#07AEE3", "MiR_ORA" = "#B3D49D", "MiR_Score" = "#35B257",
                                       "Edge_ORA" = "#EDC194", "Edge_Score1D" = "#F09137", "Edge_Score2D" = "#626FB3",
                                       "Edge_Topology" = "#EAA5C2","Edge_Network" = "#FA8072")){

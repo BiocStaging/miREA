@@ -6,7 +6,7 @@
 #'
 #' @param method a character that specifies only one method which you have the corresponding enrichment result (only five edge-based methods are supported).
 #' @param result the output of miREA() function. Just use the unprocessed result list as the input here.
-#' @param input_data the output of get_all_input_data() function. Just use the unprocessed input_data list as the input here.
+#' @param input_data the output of getAllInputData() function. Just use the unprocessed input_data list as the input here.
 #' @param n_mir_heatmap The number of miRNAs included in the heatmap. Default is 20.
 #' @param n_mir_sankey The number of miRNAs included in the Sankey diagram. Default is 10.
 #' @param n_pathway The number of top enriched pathways included in the heatmap. Default it 10. If the number of enriched pathways is less than n_pathway, all enriched pathways will be included.
@@ -24,8 +24,8 @@
 #' data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
 #' data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI)
 #' # Edge_Score2D is included so input_data carries the MGI "strength" scores
-#' # plot_heatmap_sankey() needs for its heatmap cells, without running it in miREA().
-#' input_data <- get_all_input_data(
+#' # plotHeatmapSankey() needs for its heatmap cells, without running it in miREA().
+#' input_data <- getAllInputData(
 #'   methods = c("Edge_ORA", "Edge_Score2D"), pathway = toy_pathway,
 #'   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
 #'   background_MGI = toy_background_MGI,
@@ -38,9 +38,9 @@
 #'   methods = "Edge_ORA", input_data = input_data, background = background,
 #'   minSize = NULL, maxSize = NULL, pvalueCutoff = 1
 #' )
-#' plot_heatmap_sankey(method = "Edge_ORA", result = result, input_data = input_data, penrichCutoff = 1)
+#' plotHeatmapSankey(method = "Edge_ORA", result = result, input_data = input_data, penrichCutoff = 1)
 #' @export
-plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, n_mir_sankey = 10,  n_pathway = 10,
+plotHeatmapSankey <- function(method, result, input_data, n_mir_heatmap = 20, n_mir_sankey = 10,  n_pathway = 10,
                                 plot_path = NULL, penrichCutoff = 0.05, height = NULL, width = NULL, sankey_prop = 1.5,
                                 gene_annot = NULL, mir_annot = NULL, annot_color = "#A6DDBA"){
   if (length(method) != 1){

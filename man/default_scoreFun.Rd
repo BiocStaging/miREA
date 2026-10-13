@@ -14,7 +14,7 @@ A character vector of length 4.
 }
 \description{
 Character vector of the score transformations supported by the
-`scoreFun` argument of [get_all_input_data()].
+`scoreFun` argument of [getAllInputData()].
 }
 \examples{
 default_scoreFun

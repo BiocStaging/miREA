@@ -14,7 +14,7 @@ A character vector of length 9.
 }
 \description{
 Character vector of the nine node-based and edge-based enrichment methods
-supported by [miREA()] and [get_all_input_data()].
+supported by [miREA()] and [getAllInputData()].
 }
 \examples{
 default_method_list

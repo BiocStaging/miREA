@@ -1,8 +1,8 @@
 data(toy_pathway, toy_gene_DEdata, toy_mir_DEdata, toy_gene_mat, toy_mir_mat,
      toy_background_MGI, toy_background_GGI, package = "miREA")
 
-test_that("get_all_input_data() builds all expected components for the full method list", {
-  input_data <- get_all_input_data(
+test_that("getAllInputData() builds all expected components for the full method list", {
+  input_data <- getAllInputData(
     methods = default_method_list,
     pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata,
@@ -22,9 +22,9 @@ test_that("get_all_input_data() builds all expected components for the full meth
   expect_true(nrow(input_data$dict_MGI) > 0)
 })
 
-test_that("get_all_input_data() requires background_MGI", {
+test_that("getAllInputData() requires background_MGI", {
   expect_error(
-    get_all_input_data(
+    getAllInputData(
       methods = "TG_ORA", pathway = toy_pathway,
       mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata
     ),
@@ -32,8 +32,8 @@ test_that("get_all_input_data() requires background_MGI", {
   )
 })
 
-test_that("get_all_input_data() works for a single method without the full pipeline", {
-  input_data <- get_all_input_data(
+test_that("getAllInputData() works for a single method without the full pipeline", {
+  input_data <- getAllInputData(
     methods = "TG_ORA", pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI
@@ -42,7 +42,7 @@ test_that("get_all_input_data() works for a single method without the full pipel
   expect_true(length(input_data$data$TG_ORA) > 0)
 })
 
-test_that("get_all_input_data() accepts SummarizedExperiment and GeneSetCollection inputs", {
+test_that("getAllInputData() accepts SummarizedExperiment and GeneSetCollection inputs", {
   skip_if_not_installed("SummarizedExperiment")
   skip_if_not_installed("GSEABase")
 
@@ -52,13 +52,13 @@ test_that("get_all_input_data() accepts SummarizedExperiment and GeneSetCollecti
     GSEABase::GeneSet(genes, setName = name)
   }, split(toy_pathway$gene, toy_pathway$pathway), names(split(toy_pathway$gene, toy_pathway$pathway))))
 
-  input_data_std <- get_all_input_data(
+  input_data_std <- getAllInputData(
     methods = default_method_list, pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
     gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"
   )
-  input_data_bioc <- get_all_input_data(
+  input_data_bioc <- getAllInputData(
     methods = default_method_list, pathway = pathway_gsc,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,

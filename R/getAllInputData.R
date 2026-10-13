@@ -28,7 +28,7 @@
 #' data(toy_mir_mat)
 #' data(toy_background_MGI)
 #' data(toy_background_GGI)
-#' input_data <- get_all_input_data(
+#' input_data <- getAllInputData(
 #'   methods = default_method_list,
 #'   pathway = toy_pathway,
 #'   mir_DEdata = toy_mir_DEdata,
@@ -42,7 +42,7 @@
 #' )
 #' names(input_data)
 #' @export
-get_all_input_data <- function(methods, pathway,
+getAllInputData <- function(methods, pathway,
                                mir_DEdata, gene_DEdata = NULL,
                                background_MGI = NULL, background_GGI = NULL, GGI_source = "Omnipath",
                                gene_mat = NULL, mir_mat = NULL,
@@ -226,7 +226,7 @@ get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
     scoreFun <- "rank"
   }
   # NOTE: required unconditionally — see the equivalent check in
-  # get_all_input_data() for why this can't be scoped to Edge_ methods only.
+  # getAllInputData() for why this can't be scoped to Edge_ methods only.
   if (is.null(background_MGI)){
     stop("background_MGI must be supplied: a two-column data.frame of miRNA, gene ",
          "pairs. miREA does not ship a bundled default background_MGI; see the ",

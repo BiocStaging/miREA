@@ -15,7 +15,7 @@
 #' @return A dataframe containing the enrichment result for MiR-ORA.
 #' @examples
 #' data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata); data(toy_background_MGI)
-#' input_data <- get_all_input_data(
+#' input_data <- getAllInputData(
 #'   methods = "MiR_ORA", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
 #'   gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
 #' )
@@ -88,7 +88,7 @@ MiR_ORA <- function(DEmiR, background = NULL, pathway, pAdjMethod = "BH", pvalue
 #' @return A dataframe containing the enrichment result for MiR-Score.
 #' @examples
 #' data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata); data(toy_background_MGI)
-#' input_data <- get_all_input_data(
+#' input_data <- getAllInputData(
 #'   methods = "MiR_Score", pathway = toy_pathway, mir_DEdata = toy_mir_DEdata,
 #'   gene_DEdata = toy_gene_DEdata, background_MGI = toy_background_MGI
 #' )

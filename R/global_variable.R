@@ -1,7 +1,7 @@
 #' Supported enrichment methods
 #'
 #' Character vector of the nine node-based and edge-based enrichment methods
-#' supported by [miREA()] and [get_all_input_data()].
+#' supported by [miREA()] and [getAllInputData()].
 #'
 #' @format A character vector of length 9.
 #' @return A character vector of length 9.
@@ -13,7 +13,7 @@ default_method_list <- c("TG_ORA", "TG_Score", "MiR_ORA", "MiR_Score", "Edge_ORA
 #' Supported score transformations
 #'
 #' Character vector of the score transformations supported by the
-#' `scoreFun` argument of [get_all_input_data()].
+#' `scoreFun` argument of [getAllInputData()].
 #'
 #' @format A character vector of length 4.
 #' @return A character vector of length 4.
@@ -77,7 +77,7 @@ default_pvalueType <- c("pos", "std", "neg")
 #' Supported gene-gene interaction sources
 #'
 #' Character vector of the background gene-gene interaction (GGI) sources
-#' supported by the `GGI_source` argument of [get_all_input_data()].
+#' supported by the `GGI_source` argument of [getAllInputData()].
 #'
 #' @format A character vector of length 2.
 #' @return A character vector of length 2.

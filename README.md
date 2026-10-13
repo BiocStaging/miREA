@@ -51,8 +51,8 @@ BiocManager::install("laixn/miREA")
 
 See `vignette("miREA")` for a full worked example using the small example
 dataset bundled with the package (`?miREA_example_data`), covering the full
-workflow: `get_all_input_data()` → `miREA()` →
-`plot_summary()`/`plot_heatmap()`/`plot_heatmap_sankey()`.
+workflow: `getAllInputData()` → `miREA()` →
+`plotSummary()`/`plotHeatmap()`/`plotHeatmapSankey()`.
 
 ```r
 library(miREA)
