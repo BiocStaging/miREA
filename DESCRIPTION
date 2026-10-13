@@ -48,8 +48,7 @@ Imports:
     stats,
     stringr,
     tibble,
-    utils,
-    V8
+    utils
 Suggests:
     BiocStyle,
     GSEABase,

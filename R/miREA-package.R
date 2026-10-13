@@ -26,7 +26,7 @@
 #' @importFrom igraph graph_from_data_frame edge_betweenness as_data_frame
 #' @importFrom igraph union make_line_graph as_adjacency_matrix
 #' @importFrom Matrix sparseMatrix Matrix
-#' @importFrom stats setNames na.omit p.adjust sd cor quantile median pt complete.cases prcomp var
+#' @importFrom stats setNames na.omit p.adjust sd cor quantile median pt complete.cases prcomp var pnorm
 #' @importFrom scales label_number
 #' @importFrom grDevices pdf dev.off
 #' @importFrom graphics plot

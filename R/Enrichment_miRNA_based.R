@@ -39,7 +39,6 @@ MiR_ORA <- function(DEmiR, background = NULL, pathway, pAdjMethod = "BH", pvalue
 
   if (is.null(background)){
     message("    No background data is given, extract all mature miRNAs from miRBase version 22 instead. ")
-    # background <- get_background_data("MiR_ORA")
     background <- unique(miRBaseConverter::getAllMiRNAs(version="v22", type="mature", species="hsa")$Name)
   }
 
@@ -119,7 +118,6 @@ MiR_Score <- function(miRList, pathway, pvalueType = "std", pAdjMethod = "BH", p
   colnames(pathway)[seq_len(2)] <- c("Term", "MiRNA")
   gsea <- clusterProfiler::GSEA(geneList = miRList, TERM2GENE = pathway, scoreType = pvalueType, pAdjustMethod = pAdjMethod, pvalueCutoff = pvalueCutoff,  minGSSize = minSize, maxGSSize = maxSize) #  scoreType = pvalueType,
   gsea_result <- as.data.frame(gsea) %>% rename(pathway = ID, padj = p.adjust, p_value = pvalue)
-  # gsea_result <- do.call(data.frame, gsea_result)
   message("  MiR-Score analysis have finished!")
 
   return(gsea_result)

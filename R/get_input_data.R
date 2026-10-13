@@ -353,7 +353,6 @@ get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
 
 get_pathway_data <- function(methods, pathway, background_MGI){
   colnames(pathway)[seq_len(2)] <- c("pathway", "gene")
-  #sum_TG <- sum(grepl("TG_", methods))
   sum_TG <- sum(grepl("TG_|^Edge_Network$", methods)) # Edge-Network needs pathway gene set to map GGI.
   sum_MiR <- sum(grepl("MiR_", methods))
   sum_Edge <- sum(grepl("Edge_", methods))
@@ -515,14 +514,12 @@ get_dict_MGI <- function(methods, mir_mat, gene_mat, data, pathway_MGI, scoreFun
     # build mat that have both miRNA and gene with only shared samples.
     mir_sub <- mir_mat[, common_samples, drop = FALSE]
     gene_sub <- gene_mat[, common_samples, drop = FALSE]
-    # mat <- rbind(mir_sub, gene_sub)
 
     # build dict dataframe: all possible combinations between miRNAs and genes,
     # who are existed in pathway and meanwhile have valid expresison profiles.
     unique_miRNAs <- intersect(unique(pathway_MGI$miRNA), unique(data$miRNA))
     unique_genes <- intersect(unique(pathway_MGI$gene), unique(data$gene))
     dict <- data.table::CJ(miRNA = unique_miRNAs, gene = unique_genes)
-    # dict <- expand.grid(miRNA = unique_miRNAs, gene = unique_genes, stringsAsFactors = FALSE)
 
     # merge with gene and miRNA differential expressed data
     mir_info <- unique(data[, .(miRNA, mirLogFC, mirPadj)])

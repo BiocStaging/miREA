@@ -87,7 +87,6 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
   n_pathway <- length(unique(pathway$pathway))
   if (n_pathway == 0) {
     warning("No pathways meet the size criteria.")
-    #return(NULL)
     return(data.frame(
       pathway = character(), MGISize = integer(),
       r = numeric(), p_value = numeric(), padj = numeric(),
@@ -97,8 +96,6 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
 
   if (is.null(ncores) || ncores == 1){
     ncores <- 1
-    # warning("You are use unparallel computing. It could cause huge amount of time!!!
-    #         \nFor parallel computing, please specify [ncores] parameter to be larger than 1 (We highly recommend that)!!!")
   }
 
   # generate random pathways
@@ -123,6 +120,7 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
     }} else {
       random_core <- min(ncores, length(unique_sizes))
       cl <- parallel::makeCluster(random_core, type = "SOCK")
+      on.exit(parallel::stopCluster(cl), add = TRUE)
       parallel::clusterExport(cl, c("compute_random_r", "r_all", "iter", "seeds_null"), envir = environment())
       size_groups <- split(unique_sizes,
                            rep(seq_len(random_core), length.out = length(unique_sizes)))
@@ -140,7 +138,6 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
           return(sub_result)
         }
       )
-      parallel::stopCluster(cl)
       r_random_list <- unlist(r_random_list, recursive = FALSE)
       names(r_random_list) <- sub("^\\d+\\.", "", names(r_random_list))
     }
@@ -164,18 +161,13 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
 Edge_Score2D_simple <- function(MGI2D, r_random_list, pathway, iter){
   pathway_names <- unique(pathway$pathway)
   pathway_list <- split(pathway, pathway$pathway)
-  ctx <- V8::v8()
-  decimal_code <- paste(readLines(system.file("javascript", "decimal.js", package = "miREA")), collapse = "\n")
-  getP_code     <- paste(readLines(system.file("javascript", "GetpValueFromZ.js", package = "miREA")), collapse = "\n")
-  ctx$eval(decimal_code)
-  ctx$eval(getP_code)
   compute_pathway <- function(i){
     pathway_name <- pathway_names[i]
     pw_single <- pathway_list[[pathway_name]]
     pw_size <- nrow(pw_single)
     r_random <- r_random_list[[as.character(pw_size)]]
 
-    result <- Edge_Score2D_single(MGI2D = MGI2D, PW = pw_single, r_random = r_random, ctx = ctx)
+    result <- Edge_Score2D_single(MGI2D = MGI2D, PW = pw_single, r_random = r_random)
 
     message("      ", i, " / ", length(pathway_names), " , ", pathway_name, " : ", round(result$p_value, 4))
 
@@ -187,7 +179,7 @@ Edge_Score2D_simple <- function(MGI2D, r_random_list, pathway, iter){
 }
 
 
-Edge_Score2D_single <- function(MGI2D, PW, r_random, ctx){
+Edge_Score2D_single <- function(MGI2D, PW, r_random){
   MGI2D <- na.omit(MGI2D)
   if (is.null(MGI2D)||!is.data.frame(MGI2D)){
     stop("Please make sure the input MGI2D is a dataframe!")
@@ -212,13 +204,10 @@ Edge_Score2D_single <- function(MGI2D, PW, r_random, ctx){
   r <- sum(points_data$r)
   count_leq <- findInterval(r, r_random) # count <= r
   nMoreExtreme <- length(r_random) - count_leq
-  # p_value <- (nMoreExtreme + 1) / (length(r_random) + 1)
-  # z <- (r - mean(r_random)) / sd(r_random)
-  # p_value <- ctx$call("GetpValueFromZ", z, "right")
 
   if (is.na(sd(r_random)) || sd(r_random) != 0){
     z <- (r - mean(r_random)) / sd(r_random)
-    p_value <- ctx$call("GetpValueFromZ", z, "right")
+    p_value <- pnorm(z, lower.tail = FALSE)
   } else {
     p_value <- 1.0000
   }

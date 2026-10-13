@@ -102,7 +102,6 @@ TG_Score <- function(geneList, pathway, pvalueType = "std", pAdjMethod = "BH",  
   gsea <- clusterProfiler::GSEA(geneList = geneList, TERM2GENE = pathway,  scoreType = pvalueType, pAdjustMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minGSSize = minSize, maxGSSize = maxSize)
   gsea_result <- as.data.frame(gsea) %>% rename(pathway = ID, padj = p.adjust, p_value = pvalue)
   ## gsea@result will only remain pathways that pass the cutoff threshold. But use as.data.frame() as well for harmonization with ORA analysis
-  # gsea_result <- do.call(data.frame, gsea_result)
 
   message("  TG-Score analysis have finished!")
 

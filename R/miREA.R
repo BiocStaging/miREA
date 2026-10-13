@@ -196,7 +196,6 @@ miREA <- function(methods, input_data, background = NULL,
         result_TG_ORA <- TG_ORA(TG = input_data$data$TG_ORA, background = background$TG, pathway = input_data$pathway$TG,
                                 pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
       })
-      #result_TG_ORA <- as.data.frame(result_TG_ORA)
       all_result[["TG_ORA"]] <- result_TG_ORA
       time <- rbind(time, data.frame(method = "TG_ORA", time = time_TG_ORA[["elapsed"]], stringsAsFactors = FALSE))
       message("    - TG_ORA finished, time cost: ", time_TG_ORA[["elapsed"]], " s. ")
@@ -210,7 +209,6 @@ miREA <- function(methods, input_data, background = NULL,
           geneList = input_data$data$TG_Score, pathway = input_data$pathway$TG, pvalueType = pvalueType$TG,
           pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
       })
-      #result_TG_Score <- as.data.frame(result_TG_Score)
       all_result[["TG_Score"]] <- result_TG_Score
       time <- rbind(time, data.frame(method = "TG_Score", time = time_TG_Score[["elapsed"]], stringsAsFactors = FALSE))
       message("    - TG_Score finished, time cost: ", time_TG_Score[["elapsed"]], " s. ")
@@ -227,7 +225,6 @@ miREA <- function(methods, input_data, background = NULL,
       })
       })
       time <- rbind(time, data.frame(method = "MiR_ORA", time = time_MiR_ORA[["elapsed"]], stringsAsFactors = FALSE))
-      #result_MiR_ORA <- as.data.frame(result_MiR_ORA)
       all_result[["MiR_ORA"]] <- result_MiR_ORA
       message("    - MiR_ORA finished, time cost: ", time_MiR_ORA[["elapsed"]], " s. ")
     }
@@ -240,7 +237,6 @@ miREA <- function(methods, input_data, background = NULL,
         result_MiR_Score <- MiR_Score(miRList = input_data$data$MiR_Score, pathway = input_data$pathway$MiR, pvalueType = pvalueType$MiR,
                                       pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
       })
-      #result_MiR_Score <- as.data.frame(result_MiR_Score)
       time <- rbind(time, data.frame(method = "MiR_Score", time = time_MiR_Score[["elapsed"]], stringsAsFactors = FALSE))
       all_result[["MiR_Score"]] <- result_MiR_Score
       message("    - MiR_Score finished, time cost: ", time_MiR_Score[["elapsed"]], " s. ")
@@ -267,7 +263,6 @@ miREA <- function(methods, input_data, background = NULL,
         result_Edge_Score1D <- Edge_Score1D(MGIList = input_data$data$Edge_Score1D, pathway = input_data$pathway$Edge, pvalueType = pvalueType$Edge,
                                         pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
       })
-      #result_Edge_Score1D <- as.data.frame(result_Edge_Score1D)
       time <- rbind(time, data.frame(method = "Edge_Score1D", time = time_Edge_Score1D[["elapsed"]], stringsAsFactors = FALSE))
       all_result[["Edge_Score1D"]] <- result_Edge_Score1D
       message("    - Edge_Score1D finished, time cost: ", time_Edge_Score1D[["elapsed"]], " s. ")
@@ -281,7 +276,6 @@ miREA <- function(methods, input_data, background = NULL,
         result_Edge_Score2D <- Edge_Score2D(MGI2D = input_data$data$Edge_Score2D, pathway = input_data$pathway$Edge, background = background$Edge,
                                           iter = iter, ncores = ncores$Edge_Score2D, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
       })
-      #result_Edge_Score2D <- as.data.frame(result_Edge_Score2D)
       time <- rbind(time, data.frame(method = "Edge_Score2D", time = time_Edge_Score2D[["elapsed"]], stringsAsFactors = FALSE))
       all_result[["Edge_Score2D"]] <- result_Edge_Score2D
       message("    - Edge_Score2D finished, time cost: ", time_Edge_Score2D[["elapsed"]], " s. ")
@@ -296,7 +290,6 @@ miREA <- function(methods, input_data, background = NULL,
                                               pathway_GGI = input_data$pathway_GGI, dict_MGI = input_data$dict_MGI, ncores = ncores$Edge_Topology, pvalueType = pvalueType$Edge,
                                               iter = iter, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
       })
-      # result_Edge_Topology <- as.data.frame(result_Edge_Topology)
       time <- rbind(time, data.frame(method = "Edge_Topology", time = time_Edge_Topology[["elapsed"]], stringsAsFactors = FALSE))
       all_result[["Edge_Topology"]] <- result_Edge_Topology
       message("    - Edge_Topology finished, time cost: ", time_Edge_Topology[["elapsed"]], " s. ")
@@ -313,7 +306,6 @@ miREA <- function(methods, input_data, background = NULL,
                                             MGI = input_data$MGI, GGI = input_data$GGI, ncores = ncores$Edge_Network,
                                             pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize, iter = iter)
       })
-      #result_Edge_Network <- as.data.frame(result_Edge_Network)
       time <- rbind(time, data.frame(method = "Edge_Network", time = time_Edge_Network[["elapsed"]], stringsAsFactors = FALSE))
       all_result[["Edge_Network"]] <- result_Edge_Network
       message("    - Edge_Network finished, time cost: ", time_Edge_Network[["elapsed"]], " s. ")

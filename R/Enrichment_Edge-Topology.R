@@ -93,7 +93,6 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
   n_pathway <- length(unique(pathway$pathway))
   if (n_pathway == 0) {
     warning("No pathways meet the size criteria.")
-    #return(NULL)
     return(data.frame(
       pathway = character(), n_MGI = integer(),
       score = numeric(), rand_score_dist = character(),
@@ -108,13 +107,6 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
   dict_MGI <- data.table::as.data.table(dict_MGI)
   dict_MGI <- dict_MGI[, .(MGI, miRNA, gene, strength)]
 
-  # javascript code for simulating p values
-  ctx <- V8::v8()
-  decimal_code <- paste(readLines(system.file("javascript", "decimal.js", package = "miREA")), collapse = "\n")
-  getP_code     <- paste(readLines(system.file("javascript", "GetpValueFromZ.js", package = "miREA")), collapse = "\n")
-  ctx$eval(decimal_code)
-  ctx$eval(getP_code)
-
   message("    Start analysis on ", n_pathway, " pathways...")
   if (is.null(ncores) || ncores == 1){
     ncores <- 1
@@ -123,7 +115,7 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
   }
   message("    Calculate pathway scores and siginificant level on ", ncores, " cores...")
   if (ncores == 1){
-    result <- Edge_Topology_simple(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter, ctx = ctx) # background = background,
+    result <- Edge_Topology_simple(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter) # background = background,
   } else {
     result <- Edge_Topology_parallel(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter, ncores = ncores) # background = background,
   }
@@ -141,7 +133,7 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
 }
 
 
-Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType, iter, ctx){ # background,
+Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType, iter){ # background,
 
 
   pathway_list <- split(pathway, pathway$pathway)
@@ -154,12 +146,10 @@ Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType
     pw_single <- pathway_list[[name]]
     pw_GGI_single <- pathway_GGI_list[[name]]
 
-    result <- Edge_Topology_single(MGI = MGI, PW = pw_single, PW_GGI = pw_GGI_single, dict_MGI = dict_MGI, pvalueType = pvalueType, iter = iter, ctx = ctx) # background = background,
+    result <- Edge_Topology_single(MGI = MGI, PW = pw_single, PW_GGI = pw_GGI_single, dict_MGI = dict_MGI, pvalueType = pvalueType, iter = iter) # background = background,
 
     message("      ", i, " / ", n_pathway, " , ", name, " : ", round(result$p_value, 4))
 
-
-    # return(as.data.frame(result))
     return(result)
   }
   pathway_result <- dplyr::bind_rows(lapply(seq_len(n_pathway), compute_pathway))
@@ -188,6 +178,7 @@ Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueTy
   }
   message(paste("      Total MGI size of each core is:", paste(task_sizes, collapse = " ")))
   cl <- parallel::makeCluster(ncores) # , type = "SOCK", outfile = NULL
+  on.exit(parallel::stopCluster(cl), add = TRUE)
 
   parallel::clusterExport(cl, c("MGI", "dict_MGI", "pathway", "pathway_GGI", "pvalueType", # "background",
                                 "iter", "ncores", "task_list", "Edge_Topology_simple", "Edge_Topology_single", "min_max"), envir = environment())
@@ -201,40 +192,29 @@ Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueTy
       KMP_SETTINGS = "FALSE"
     )
 
-    # .libPaths(c("/projappl/project_2011179/rpackages_440", .libPaths()))
-
     requireNamespace("igraph")
     requireNamespace("data.table")
     requireNamespace("dplyr")
-
-    # V8 cannot be used across process
-    requireNamespace("V8")
 
     NULL
   })
 
   results <- parallel::parLapply(cl, seq_len(ncores), function(i) {
-    ctx <- V8::v8()
-    decimal_code <- paste(readLines(system.file("javascript", "decimal.js", package = "miREA")), collapse = "\n")
-    getP_code     <- paste(readLines(system.file("javascript", "GetpValueFromZ.js", package = "miREA")), collapse = "\n")
-    ctx$eval(decimal_code)
-    ctx$eval(getP_code)
     pw <- pathway[pathway %in% task_list[[i]]]
     ggi <- pathway_GGI[pathway %in% task_list[[i]]]
     Edge_Topology_simple(MGI = MGI, dict_MGI = dict_MGI,
                           pathway = pw, pathway_GGI = ggi, # background,
                           pvalueType = pvalueType,
-                          iter = iter, ctx)
+                          iter = iter)
   })
 
-  parallel::stopCluster(cl)
   pathway_result <- combine_parallel(results)
   return(pathway_result)
 }
 
 
 
-Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, ctx){
+Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter){
   if (is.null(PW_GGI)){
     PW_GGI <- data.table(pathway = character(), from = character(), to = character(), stringsAsFactors = FALSE)
   }
@@ -372,19 +352,15 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, ct
   # z-score
   if (is.na(sd(s_random)) || sd(s_random) != 0){
     z <- (PW_score - mean(s_random)) / sd(s_random)
-    type <- switch(
+    p_value <- switch(
       pvalueType,
-      "pos" = "right",
-      "neg" = "left",
-      "std" = "twosided"
+      "pos" = pnorm(z, lower.tail = FALSE),
+      "neg" = pnorm(z),
+      "std" = 2 * pnorm(-abs(z))
     )
-    p_value <- ctx$call("GetpValueFromZ", z, type)
   } else {
     p_value <- 1.0000
   }
-
-
-  # p_value <- (nMoreExtreme + 1) / (nPerm + 1)
 
   random_ds <- round(quantile(s_random, c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE), 4)
   random_mean <- round(mean(s_random, na.rm = TRUE), 4)

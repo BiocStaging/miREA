@@ -42,7 +42,6 @@ plot_summary <- function(result, penrichCutoff = NULL, plot_path = NULL,
                                       "Edge_ORA" = "#EDC194", "Edge_Score1D" = "#F09137", "Edge_Score2D" = "#626FB3",
                                       "Edge_Topology" = "#EAA5C2","Edge_Network" = "#FA8072")){
   enrich <- list()
-  # n_pathway <- result$parameter$n_pathway
   all_pathways <- unique(unlist(lapply(result$result, function(df) df$pathway)))
   n_pathway <- length(all_pathways)
   summary <- data.frame(method = character(), n_pathway = integer(), positive_rate = numeric(), stringsAsFactors = FALSE)
@@ -58,11 +57,6 @@ plot_summary <- function(result, penrichCutoff = NULL, plot_path = NULL,
   rate_plot <- plot_positive_rate(summary, fill_col)
   pca_plot <- plot_pca(result, fill_col)
   overlap_plot <- plot_overlap_ht(enrich)
-  # jaccard_plot <- plot_jaccard_ht(enrich)
-
-  # combined <- (rate_plot + pca_plot) / (overlap_plot + jaccard_plot) +
-  #   plot_layout(widths = c(1, 1), heights = c(1,1)) & #, guides = "collect"
-  #   theme(plot.margin = margin(2,2,2,2))
 
   combined <- (rate_plot + overlap_plot + pca_plot) +
     plot_layout(widths = c(1, 1, 1), heights = 1) & #, guides = "collect"
@@ -126,8 +120,7 @@ plot_positive_rate <- function(summary, fill_col){# plot_path
       panel.grid = element_blank()
     ) +
     coord_fixed(ratio = ratio, clip = "off") +
-    scale_y_continuous(expand = c(0,0), limits = c(0, y_range[2] * 1.05)) #+
-    #guides(fill = guide_legend(title = "Methods", title.theme = element_text(face = "bold")))
+    scale_y_continuous(expand = c(0,0), limits = c(0, y_range[2] * 1.05))
 
   return(p)
 }
@@ -152,7 +145,6 @@ plot_pca <- function(result, fill_col){
 
 
   pca_scores <- as_tibble(pca_results$x) # Keep patient IDs
-  # rownames(pca_scores) <- colnames(pval_matrix)
 
   pca_summary <- summary(pca_results)
 
@@ -225,7 +217,7 @@ plot_overlap_ht <- function(enrich){
         if (union == 0){
           matrix[i,j] <- 0
         } else {
-          matrix[i, j] <- intersection / union#round(intersection / union, 4)
+          matrix[i, j] <- intersection / union
         }
       }
 
@@ -233,7 +225,6 @@ plot_overlap_ht <- function(enrich){
   }
   df <- reshape2::melt(matrix, varnames = c("Method1", "Method2"), value.name = "Value")
   df$Value <- as.numeric(df$Value)
-  # df$Method2 <- factor(df$Method2, levels = rev(unique(df$Method2)))
 
   df$Type <- ifelse(as.numeric(df$Method1) < as.numeric(df$Method2), "Upper",
                     ifelse(df$Method1 == df$Method2, "Diag", "Lower"))
@@ -242,18 +233,14 @@ plot_overlap_ht <- function(enrich){
   df$Method2 <- factor(df$Method2, levels = rev(unique(df$Method2)))
 
   overlap <- ggplot(df, aes(x = Method1, y = Method2, label = text)) +
-
-
-    # scale_fill_gradientn(colors = brewer.pal(9, "GnBu"), limits = c(0, 1)) +
-
-    # lower part: jaccard index
-    geom_point(data = subset(df, Type %in% "Upper"), # c("Lower", "Diag")
+    # upper plot: jaccard index
+    geom_point(data = subset(df, Type %in% "Upper"),
                aes(size = Value),
                shape = 21, fill = "grey60", color = "black") +
-    # upper plot: overlap count
-    geom_point(data = subset(df, Type %in% c("Lower", "Diag")), # "Upper"
+    # lower part: overlap count
+    geom_point(data = subset(df, Type %in% c("Lower", "Diag")),
                aes(color = Value),
-               shape = 15, size = 8) + #
+               shape = 15, size = 8) +
     geom_tile(color = "black", linewidth = 0.5, linetype = 1, fill = NA) +
     {
       # When every method's overlap count is identical (e.g. all pathways
@@ -280,8 +267,6 @@ plot_overlap_ht <- function(enrich){
       aes(label = text),
       size = 0.5 * length(enrich)
     ) +
-
-    # scale_size(range(c(2,8))) +
     coord_fixed() +
     theme_minimal() +
     labs(title = "Enrichment Overlap for Different Methods", x = NULL, y = NULL, color = "Overlap Count", size = "Jaccard Index") +
@@ -289,7 +274,6 @@ plot_overlap_ht <- function(enrich){
       axis.text.x = element_text(color = "black", angle = 45, hjust = 1, size = 8),
       axis.text.y = element_text(color = "black", size = 8),
       panel.grid = element_blank(),
-      # panel.border = element_rect(colour = "black", fill = NA, linewidth = 1),
       legend.title = element_text(size = 9, face = "bold"),
       legend.text = element_text(size = 7),
       plot.title = element_text(hjust = 0.5, face = "bold", size = 12)
@@ -313,7 +297,6 @@ plot_pvalue_dens <- function(result, fill_col){
   plot_list <- lapply(names(plist), function(method) {
     df <- data.frame(pvalue = plist[[method]])
     ggplot(df, aes(x = pvalue)) +
-      # geom_density(fill = fill_col[method], alpha = 0.6) +
       geom_density(aes(y = after_stat(density/max(density))),
                    fill = fill_col[method], alpha = 0.6) +
       scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25), labels = label_number(accuracy = 0.01)) +
@@ -330,13 +313,10 @@ plot_pvalue_dens <- function(result, fill_col){
         aspect.ratio = 1,
         plot.title = element_text(hjust = 0.5, size = 12),
         axis.title = element_blank(),
-        # strip.text = element_text(size = 12, hjust = 0.5),
         axis.text = element_text(size = 10, color = "black"),
-        # axis.ticks.length = unit(0.2, "cm"),
-        # axis.ticks = element_line(color = "black"),
         panel.border = element_rect(color = "black", fill = NA, linewidth = 0.75)
       ) +
-      labs(x = "pvalue", y = "density") +     # , title = "Pvalue Density for Different Methods"
+      labs(x = "pvalue", y = "density") +
       guides(fill = "none")
   })
   names(plot_list) <- names(plist)

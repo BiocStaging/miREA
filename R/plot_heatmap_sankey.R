@@ -43,9 +43,6 @@
 plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, n_mir_sankey = 10,  n_pathway = 10,
                                 plot_path = NULL, penrichCutoff = 0.05, height = NULL, width = NULL, sankey_prop = 1.5,
                                 gene_annot = NULL, mir_annot = NULL, annot_color = "#A6DDBA"){
-  # fill_col = c("TG_ORA" = "#97D7F2", "TG_Score" = "#07AEE3", "MiR_ORA" = "#B3D49D", "MiR_Score" = "#35B257",
-  #              "Edge_ORA" = "#EDC194", "Edge_Score1D" = "#F09137", "Edge_Score2D" = "#626FB3",
-  #              "Edge_Topology" = "#EAA5C2","Edge_Network" = "#FA8072")
   if (length(method) != 1){
     stop("Please specify only ONE [method] each time!")
   }
@@ -58,7 +55,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     parameter = result$parameter
   )
 
-  # methods <- names(result$result)
   if (sum(grepl("Edge", method)) == 0){
     stop("Only useful when the methods include Edge-based method.")
   }
@@ -108,10 +104,7 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
   all_paths <- unique(enriched_path$pathway)
   pathway <- pathway %>% filter(pathway %in% all_paths)
 
-
-  # pathway <- input_data$pathway$Edge %>% filter(pathway %in% all_paths)
   data <- input_data$data$data
-  # result <- result$result
 
   path_MGI <- table(factor(pathway$pathway, levels = all_paths))
 
@@ -128,14 +121,12 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
 
   ## 1. Annotation -----
   #### 1.1 pathway-level annotation: path_order, path_MGI, path_DEMGI -----
-  # filter MGI dataframe
   n_total <- length(unique(MGIList$miRNA))
   n_keep <- min(n_mir, n_total)
   DEmiRs <- data %>% filter(abs(mirLogFC) > 1, mirPadj < 0.05) %>% pull(miRNA) %>% unique()
 
   top_miRNA <- MGIList %>% mutate(MGI = paste0(miRNA, ":", gene)) %>%
     mutate(is_DE = ifelse(MGI %in% unique(DEMGI$MGI), 1, 0)) %>%
-    # select(miRNA, is_DE) %>% distinct() %>%
     group_by(miRNA) %>% summarise(n_DE = sum(is_DE)) %>%
     ungroup() %>% arrange(desc(n_DE)) %>%
     slice_head(n = n_keep) %>%
@@ -163,10 +154,7 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     arrange(geneLogFC)
   gene_order <- gene_anno$gene
 
-  # MGIList <- get_top_mir(MGIList, min(n_mir, length(unique(MGIList$miRNA)))) # dataframe: miRNA, gene, strength, only n_mir unique miRNAs involved.
   # A. build miRNA-gene matrix: miR_mat, miR_DElabel_mat ----
-  # unique_mir <- unique(MGIList$miRNA)
-  # unique_gene <- unique(MGIList$gene)
   miR_mat <- matrix(NA, nrow = length(top_miRNA), ncol = length(gene_order),
                     dimnames = list(top_miRNA, gene_order))
   for (i in seq_len(nrow(MGIList))){
@@ -188,7 +176,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
   miR_min <- min(miR_vals)
   miR_max <- max(miR_vals)
 
-  # v <- ceiling(max(abs(miR_vals)))
   v <- round_up_to(max(abs(miR_vals), na.rm = TRUE))
 
   # unit color map
@@ -200,7 +187,7 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
   } else if (miR_max < 0){
     mir_col <- colorRamp2(
       breaks = c(miR_min, 0),
-      colors = c("#ff6700",  "#FFD7B5")#"#FFB38A"
+      colors = c("#ff6700",  "#FFD7B5")
     )
   } else{
     mir_col <- colorRamp2(
@@ -213,7 +200,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
   #### 1.2 miRNA-level annotation: mir_target, mir_DEtarget ----
   bg <- input_data$background_MGI
   mir_target <- table(factor(bg$miRNA, levels = top_miRNA))
-  # mir_target <- table(bg$miRNA)[top_miRNA]
 
   bg_DEG <- bg %>% filter(gene %in% DEG) %>% distinct()
   mir_DEtarget <- table(factor(bg_DEG$miRNA, levels = top_miRNA))
@@ -285,7 +271,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     )
   }
 
-  #
   # B. build pathway-gene matrix: path_mat, path_DElabel_mat ----
   path_mat <- matrix(0, nrow = length(all_paths), ncol = length(gene_order),
                      dimnames = list(all_paths, gene_order))
@@ -347,18 +332,14 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
 
   ## 2. Legends ----
   ## miRNA log2FoldChange
-  col_mir_fc <- colorRamp2(c(-mir_max,0,mir_max),c("#add8e6",  "white", "#ffb6c1")) # c("#0571b0", "#f7f7f7", "#ca0020") ,c("#add8e6",  "white", "#ffb6c1")
+  col_mir_fc <- colorRamp2(c(-mir_max,0,mir_max),c("#add8e6",  "white", "#ffb6c1"))
   range_mir_fc <- seq(-mir_max, mir_max, length = 5)
   lgd_mir_fc <- Legend(title = "miRNA Log2FC", col_fun = col_mir_fc, at = range_mir_fc, labels = paste(range_mir_fc))
   ## miRNA padj
-  col_mir_padj <- colorRamp2(c(0, 0.05, 1),  c("#ff6666","mistyrose", "#f7f7f7")) # "#f03b20", "#feb24c", "#ffeda0"
+  col_mir_padj <- colorRamp2(c(0, 0.05, 1),  c("#ff6666","mistyrose", "#f7f7f7"))
   lgd_mir_padj <- Legend(title = "miRNA Padj", col_fun = col_mir_padj, at = c(0, 0.05, 1))
   ## method padj
-  # lgd_method_list <- lapply(methods, function(method) {
-  #   Legend(title = paste0(method, " Padj"), col_fun = colorRamp2(c(0, 0.05, 1), c(scales::alpha(col_fill[[method]], 0.7), "grey90", "grey90")), at = c(0, 0.05, 1))
-  # })
   lgd_method <- Legend(title = paste0(method, " Padj"), col_fun = colorRamp2(c(0, penrichCutoff, 1), c("#ff6666", "mistyrose", "grey90")), at = c(0, penrichCutoff, 1))
-  # names(lgd_method_list) <- methods
   ## gene log2FoldChange
   lgd_gene_fc_cat <- Legend(title = "Gene Expression \n(* shows DEG)", legend_gp = gpar(fill = c("blue", "red")), labels = c("downregulated", "upregulated"))
   col_gene_fc <- colorRamp2(c(-gene_max,0,gene_max),c("#add8e6",  "white", "#ffb6c1"))
@@ -366,16 +347,8 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
   lgd_gene_fc <- Legend(title = "Gene Log2FC", col_fun = col_gene_fc, at = range_gene_fc, labels = paste(range_gene_fc))
 
   ## DE rectangle
-  # lgd_DEG <- Legend(labels = "DEG", type = "points", pch = 22, legend_gp = gpar(fill = "grey50", col = "red", lwd = 2))
-  # lgd_DEMGI <- Legend(labels = "DEMGI", type = "points", pch = 22, legend_gp = gpar(fill = "white", col = "#B266CC", lwd = 2))
-  # lgd_DE <- Legend(title = "DE", labels = c("DEG", "DEMGI"), type = c("points", "points"), pch = c(22,22), legend_gp = gpar(fill = c("grey50", "white"), col = c("red", "#b266cc"), lwd = c(2,2)))
   lgd_DE <- Legend(title = "MGI Expression", labels = c("DEMGI"),  type = c("points"), pch = c(22),
                    legend_gp = gpar(fill = c("white"), col = c("#b266cc"), lwd = c(2)), size = unit(5, "mm"))
-
-  # sankey plot annotation
-  # lgd_expression <- Legend(title = "Expression", legend_gp = gpar(fill = c("#FFB3B3", "#99D2E7")), labels = c("upregulated", "downregulated"))
-  # lgd_strength <- Legend(title = "Strength", legend_gp = gpar(lty = c("dashed", "solid"), col = c("black", "black")),type = "lines", labels = c("positive", "negative"))
-  # lgd_enrich <- Legend(title = "Enriched", legend_gp = gpar(fill = c("#ff6666", "grey")), labels = c("TRUE", "FALSE"))
 
   # cancer-related gene
   if (!is.null(gene_annot)){
@@ -390,17 +363,8 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     mir_left_lgd <- NULL
   }
 
-  ht_list <- c(gene_top_lgd, lgd_method, lgd_gene_fc_cat, mir_left_lgd, lgd_DE, lgd_gene_fc, lgd_mir_fc, lgd_mir_padj) #
-  #sankey_list <- list(lgd_expression, lgd_strength) # , lgd_enrich
-  #legend_list <- c(ht_list, sankey_list)
+  ht_list <- c(gene_top_lgd, lgd_method, lgd_gene_fc_cat, mir_left_lgd, lgd_DE, lgd_gene_fc, lgd_mir_fc, lgd_mir_padj)
   legend_list <- ht_list
-
-
-  # packed_legends <- packLegend(
-  #   list = legend_list,
-  #   direction = "vertical",
-  #   gap = unit(5, "mm")
-  # )
 
   ## 3. Heatmaps ----
   ht_unit <- min(c(0.0264*(800-50)/dim(path_mat)[1],0.5))
@@ -455,8 +419,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
       star = anno_text(
         ifelse(abs(gene_anno$geneLogFC) > 1, "*", ""),
         gp = gpar(fontsize = 18, col = ifelse(gene_anno$geneLogFC < 0, "blue", "red")),
-        # location = unit(1, "npc"),
-        # location = unit(gene_anno$geneLogFC + 0.2 * sign(gene_anno$geneLogFC), "native"),
         location = 0.5,
         just = "center",
         rot = 0
@@ -474,12 +436,8 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
   h2_wd <- ceiling(wd_unit*dim(miR_mat)[2])
 
   ##### sankey plot ----
-  # sankey <- plot_sankey(method = method, result = result, input_data = input_data, penrichCutoff = penrichCutoff, n_mir = n_mir_sankey, n_pathway = n_pathway)
   sankey <- plot_sankey(dict = data, pathway = pathway, enriched_path = enriched_path, all_paths = all_paths, top_miRNA = top_miRNA, mir_max = mir_max, gene_max = gene_max, strength_max = v , penrichCutoff = penrichCutoff, n_mir = n_mir_sankey, n_pathway = n_pathway)
   sankey <- ggplotGrob(sankey)
-  # low_anno <- HeatmapAnnotation(
-  #   foo = anno_simple(sankey, which = "column", height = unit(10, "cm"))
-  # )
   anno_ggplot <- AnnotationFunction(
     fun = function(index, k, n){
       pushViewport(viewport()) # width = unit(4, "cm"), height = unit(6, "cm")
@@ -516,11 +474,10 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
     cluster_columns = FALSE,
     show_column_names = FALSE,
     cell_fun = function(j, i, x, y, width, height, fill) {
-      # grid.rect(x, y, width, height, gp = gpar(col = "grey70", lwd = 0.5, fill = NA))
       if (!is.na(miR_DElabel_mat[i, j]))
       {
         grid.rect(x,y,width = width,height = height,
-                  gp = gpar(lwd = 3, col = "#B266CC",fill = fill))# #B19CD9
+                  gp = gpar(lwd = 3, col = "#B266CC",fill = fill))
       }
     },
     heatmap_legend_param = list(
@@ -530,11 +487,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
       na_col = "white"
     ),
     left_annotation = left_mir_annot,
-    # left_annotation = rowAnnotation(mir_tar = anno_text(
-    #   paste('(', as.integer(mir_DEMGI_path), "/", as.integer(mir_DEMGI), "/", as.integer(mir_DEtarget), '/', as.integer(mir_target), ')', sep = ''),
-    #   gp = gpar(fontsize = 12)
-    # )),
-
     right_annotation = rowAnnotation(
       mir_fc = mir_anno$mirLogFC,
       mir_padj = mir_anno$mirPadj,
@@ -600,7 +552,6 @@ plot_heatmap_sankey <- function(method, result, input_data, n_mir_heatmap = 20, 
 plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_max, gene_max, strength_max , penrichCutoff = 0.05, n_mir = 25, n_pathway = 10){
 
   pathway <- pathway %>% filter(pathway %in% all_paths)
-  # path_MGI <- table(factor(pathway$pathway, levels = all_paths))
   dict_DE <- dict %>%
     filter(cor < 0, corPadj < 0.05, genePadj < 0.05, abs(geneLogFC) >= 1, mirPadj < 0.05, abs(mirLogFC) >= 1) %>%
     arrange(desc(abs(strength)))
@@ -609,7 +560,6 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
   pw_MGI <- unique(paste0(pathway$miRNA, ":", pathway$gene))
   dict_DEMGI <- dict_DE %>%
     filter(paste0(miRNA,":", gene) %in% pw_MGI)
-  #n_total <- length(unique(dict_DEMGI$miRNA))
   n_total <- length(top_miRNA)
   n_keep <- min(n_mir, n_total)
   unique_mir <- top_miRNA[seq_len(n_keep)]
@@ -743,8 +693,6 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
                                           levels = c("miRNA", "gene", "pathway"))
 
 
-  # gene_colors <- qualitative_hcl(length(unique(df_mir_gene$gene)), palette = "Set 3")
-  # names(gene_colors) <- unique(df_mir_gene$gene)
   gene_colors <- setNames(rep("#B3D49D90", length(unique(df_mir_gene$gene))), unique(df_mir_gene$gene))
   sankey <- ggplot() +
     geom_flow(data = df_mir_gene_long,
@@ -752,19 +700,14 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
                   stratum = stratum,
                   alluvium = alluvium,
                   y = flow_value,
-                  # linetype = sign,
                   fill = strength),
               stat = ggalluvial::StatAlluvium,
-              color = "purple", #"#b266cc",# "black",
+              color = "purple",
               alpha = 0.7,
-              # linetype = "solid",
-              # linewidth = 1,
               aes.flow = "forward") +
-    # scale_linetype_manual(name = "Strength", values = c("neg" = "solid", "pos" = "dashed"), labels = c("Negative", "Positive"), guide = "none") +
     scale_fill_gradientn(
       colors = c("#ff6700", "grey80", "#238B45"), limits = c(-strength_max, strength_max),
       values = scales::rescale(c(-strength_max, 0, strength_max)), breaks = c(-strength_max, -strength_max/2, 0, strength_max/2, strength_max), name = "Strength", guide = "none"
-      #oob = scales::squish
     ) +
     new_scale_fill() +
     geom_flow(data = df_gene_path_long,
@@ -801,8 +744,6 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank()
-      # plot.margin = unit(c(0,0,0,0), "cm")
-      # text = element_text(family = "Arial Unicode MS")
     ) +
     scale_y_continuous(expand = c(0.02,0))
 

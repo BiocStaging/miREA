@@ -69,8 +69,7 @@ Edge_Network <- function(DEMGI,
   colnames(pathway_MGI)[seq_len(3)] <- c("pathway", "miRNA", "gene")
   colnames(MGI)[seq_len(2)] <- c("miRNA", "gene")
   pathway <- pathway_MGI %>%
-    mutate(MGI = paste0(miRNA,":",gene)) #%>%
-    #filter(MGI %in% background)
+    mutate(MGI = paste0(miRNA,":",gene))
   MGISize <- pathway_MGI %>% group_by(pathway) %>%
     summarise(n_MGI = n()) %>% ungroup()
   rm(pathway_MGI)
@@ -92,7 +91,6 @@ Edge_Network <- function(DEMGI,
   n_pathway <- length(unique(pathway$pathway))
   if (n_pathway == 0) {
     warning("No pathways meet the size criteria.")
-    #return(NULL)
     return(data.frame(
       pathway = character(), n_MGI = integer(), score = numeric(), rand_score_dist = character(), p_value = numeric(),  padj = numeric(),
       contribute_MGI = character(), n_contribute_MGI = integer(),
@@ -133,7 +131,6 @@ Edge_Network <- function(DEMGI,
     pull(MGI)
   DEMGI_connect <- setdiff(isolated_edges, DEMGI_out)
   DEMGI_in <- setdiff(DEMGI, isolated_edges)
-  # DEMGI_in <- setdiff(DEMGI, DEMGI_out)
   if (length(DEMGI_in) + length(DEMGI_connect) == 0){ #
     stop("All DEMGIs are not included in any pathway. Edge_Network doesn't work in this situation. Please try other methods.\n")
   }
@@ -143,13 +140,11 @@ Edge_Network <- function(DEMGI,
   restart_list <- as.integer(edge_ids %in% DEMGI)
   names(restart_list) <- edge_ids
 
-  # num_DE = sum(restart_list)
   num_DE_in <- length(DEMGI_in)
   num_DE_connect <- length(DEMGI_connect)
   MGI_out_indices <- which(all_edges$type == "MGI" & edge_ids %in% DEMGI_out) # fixed as 1
   MGI_pw_indices <- which(all_edges$type == "MGI" & edge_ids %in% pathway$MGI) # all MGIs that in the randomization range
   MGI_connect_indices <- setdiff(which(all_edges$type == "MGI"), c(MGI_out_indices, MGI_pw_indices))
-  # MGI_pw_indices <- setdiff(which(all_edges$type == "MGI"), MGI_out_indices)
 
   set.seed(12345)
   seeds_null <- sample(10000, iter, replace = FALSE)
@@ -160,7 +155,6 @@ Edge_Network <- function(DEMGI,
       set.seed(seeds_null[i])
       new_restart <- rep(0, length(edge_ids))
       new_restart[MGI_out_indices] <-1 # fixed DEMGI that outside the pathways as 1
-      # selected_indices <- sample(MGI_indices, num_DE, replace = FALSE)
       selected_pw_indices <- sample(MGI_pw_indices, num_DE_in, replace = FALSE)
       selected_connect_indices <- sample(MGI_connect_indices, num_DE_connect, replace = FALSE)
       selected_indices <- c(selected_pw_indices,selected_connect_indices)
@@ -170,19 +164,17 @@ Edge_Network <- function(DEMGI,
   )
   colnames(restart_matrix) <- c('OBS', paste0("P", seq(iter)))
 
-  # cat("      Size of restart_matrix:", object.size(restart_matrix)/(1024*1024), "MB.\n")
   restart_matrix <- as(Matrix::Matrix(restart_matrix, sparse = TRUE), "dgCMatrix")
   message("      Size of sparse restart_matrix: ", object.size(restart_matrix)/(1024*1024), " MB.")
   rm(orig_edges_df, isolated_df, MGI, GGI)
 
-  # ### Step 2. Sparse Edge-based Transition Matrix
+  ### Step 2. Sparse Edge-based Transition Matrix
   if (is.null(ncores) || ncores == 1){
     ncores <- 1
     warning("You are use unparallel computing. It could cause huge amount of time!!!
             \nFor parallel computing, please specify [ncores] parameter to be larger than 1 (We highly recommend that)!!!\n")
   }
   message("    Build transition matrix...")
-  # cat("      Start time:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
 
   lg <- igraph::make_line_graph(graph)
   V(lg)$name <- E(graph)$name
@@ -227,7 +219,6 @@ Edge_Network <- function(DEMGI,
       new_p <- new_p + alpha * seed.vec
 
       # check difference
-      # diff_val <- sum(abs(new_p - p))
       diff_val <- Matrix::colSums(abs(new_p - p))
       step <- step + 1
 
@@ -261,16 +252,15 @@ Edge_Network <- function(DEMGI,
 
 
     cl <- parallel::makeCluster(ncores)
+    on.exit(parallel::stopCluster(cl), add = TRUE)
     parallel::clusterExport(cl, varlist = c("transition_matrix", "run_rwr", "perm_mat"), envir = environment())  # , "edge_ids", "restart_matrix"
     parallel::clusterEvalQ(cl, requireNamespace("Matrix"))
 
     perm_scores_list <- parallel::parLapply(cl, block_indices, function(idxs) {
       do.call(cbind, lapply(idxs, function(i) run_rwr(perm_mat[, i, drop = FALSE])))
     })
-    parallel::stopCluster(cl)
     perm_scores <- do.call(cbind, perm_scores_list)
   } else {
-    # perm_scores <- apply(perm_mat, 2, run_rwr)
     perm_scores <- do.call(cbind, lapply(seq_len(ncol(perm_mat)), function(i) {
       run_rwr(perm_mat[, i, drop = FALSE])
     }))
@@ -285,11 +275,9 @@ Edge_Network <- function(DEMGI,
   pw_dt <- as.data.table(pw_all)
   rm(pathway, pathway_GGI, pw_all)
 
-  # obs_dt <- data.table(edge = edge_ids, score = obs_score)
   obs_dt <- data.table(edge = rownames(obs_score), score = as.numeric(obs_score))
   setkey(obs_dt, edge)
   obs_result <- pw_dt[,.(score = sum(obs_dt[edge,score])), by = pathway]
-  # obs_result <- merge(obs_dt, pw_dt, by = "edge", allow.cartesian = TRUE)[, .(score = sum(score)), by = pathway]
 
   # get top contributed MGIs
   edge_score <- merge(pw_dt, obs_dt, by = "edge", all.x = TRUE)
@@ -345,12 +333,6 @@ Edge_Network <- function(DEMGI,
   rm(perm_result)
 
   # calculate p-values
-  ctx <- V8::v8()
-  decimal_code <- paste(readLines(system.file("javascript", "decimal.js", package = "miREA")), collapse = "\n")
-  getP_code     <- paste(readLines(system.file("javascript", "GetpValueFromZ.js", package = "miREA")), collapse = "\n")
-  ctx$eval(decimal_code)
-  ctx$eval(getP_code)
-
   pval_dt <- result[, {
     sd_perm <- sd(score_perm)
     mu_perm <- mean(score_perm)
@@ -360,7 +342,7 @@ Edge_Network <- function(DEMGI,
         p_value = 1.0000)
     } else {
       z <- (obs - mu_perm) / sd_perm
-      p <- ctx$call("GetpValueFromZ", z, "right")
+      p <- pnorm(z, lower.tail = FALSE)
       .(z = as.numeric(z),
         p_value = as.numeric(p))
     }
