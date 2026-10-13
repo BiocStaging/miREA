@@ -22,7 +22,7 @@ Edge_Topology(
 \arguments{
 \item{MGI}{A four-column dataframe, including MGI miRNA gene strength.}
 
-\item{pvalueType}{How to calculate p value. See default.pvalueType for all possible options. Default pvalueType is "pos".
+\item{pvalueType}{How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 The "pos" and "neg" score types are intended to be used for one-tailed tests
 (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 The "std" is used when interseted both positive and negative scores.}
@@ -38,7 +38,7 @@ The "std" is used when interseted both positive and negative scores.}
 \item{iter}{Number of iterations for permutation test.}
 
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-Use default.pAdjMethod to find all possible values.}
+Use default_pAdjMethod to find all possible values.}
 
 \item{pvalueCutoff}{The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.}
 
@@ -72,7 +72,7 @@ res <- Edge_Topology(
   MGI = input_data$data$Edge_Topology, background = background,
   pathway = input_data$pathway$Edge, pathway_GGI = input_data$pathway_GGI,
   dict_MGI = input_data$dict_MGI, pvalueType = "neg",
-  minSize = 2, maxSize = 5000, iter = 100, ncores = 1, pvalueCutoff = 1
+  minSize = 2, maxSize = 5000, iter = 20, ncores = 1, pvalueCutoff = 1
 )
 head(res)
 }

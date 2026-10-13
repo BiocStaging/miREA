@@ -6,9 +6,9 @@
 #' @format A character vector of length 9.
 #' @return A character vector of length 9.
 #' @examples
-#' default.method_list
+#' default_method_list
 #' @export
-default.method_list <- c("TG_ORA", "TG_Score", "MiR_ORA", "MiR_Score", "Edge_ORA", "Edge_Score1D", "Edge_Score2D", "Edge_Topology", "Edge_Network")
+default_method_list <- c("TG_ORA", "TG_Score", "MiR_ORA", "MiR_Score", "Edge_ORA", "Edge_Score1D", "Edge_Score2D", "Edge_Topology", "Edge_Network")
 
 #' Supported score transformations
 #'
@@ -18,9 +18,9 @@ default.method_list <- c("TG_ORA", "TG_Score", "MiR_ORA", "MiR_Score", "Edge_ORA
 #' @format A character vector of length 4.
 #' @return A character vector of length 4.
 #' @examples
-#' default.scoreFun
+#' default_scoreFun
 #' @export
-default.scoreFun <- c("none", "rank", "sigmoid", "normalize")
+default_scoreFun <- c("none", "rank", "sigmoid", "normalize")
 
 #' Supported p-value adjustment methods
 #'
@@ -31,9 +31,9 @@ default.scoreFun <- c("none", "rank", "sigmoid", "normalize")
 #' @format A character vector of length 8.
 #' @return A character vector of length 8.
 #' @examples
-#' default.pAdjMethod
+#' default_pAdjMethod
 #' @export
-default.pAdjMethod <- c("BH", "holm", "hochberg", "hommel", "bonferroni", "BY", "fdr", "none")
+default_pAdjMethod <- c("BH", "holm", "hochberg", "hommel", "bonferroni", "BY", "fdr", "none")
 
 #' Supported predefined pathway sets
 #'
@@ -43,21 +43,21 @@ default.pAdjMethod <- c("BH", "holm", "hochberg", "hommel", "bonferroni", "BY", 
 #' @format A character vector of length 3.
 #' @return A character vector of length 3.
 #' @examples
-#' default.pathway_list
+#' default_pathway_list
 #' @export
-default.pathway_list <- c("Reactome", "hallmark", "TP")
+default_pathway_list <- c("Reactome", "hallmark", "TP")
 
 #' Cancer types used for the TP pathway set
 #'
 #' Character vector of TCGA cancer-type abbreviations used to build the
-#' `"TP"` (cancer-specific) pathway set in [default.pathway_list].
+#' `"TP"` (cancer-specific) pathway set in [default_pathway_list].
 #'
 #' @format A character vector of length 16.
 #' @return A character vector of length 16.
 #' @examples
-#' default.TP_cancer
+#' default_TP_cancer
 #' @export
-default.TP_cancer <- c("BLCA", "BRCA", "CESC", "COAD", "ESCA", "KIRC",
+default_TP_cancer <- c("BLCA", "BRCA", "CESC", "COAD", "ESCA", "KIRC",
                       "KIRP", "LIHC", "LUAD", "LUSC", "PAAD", "PRAD",
                       "READ", "STAD", "THCA", "UCEC")
 
@@ -70,9 +70,9 @@ default.TP_cancer <- c("BLCA", "BRCA", "CESC", "COAD", "ESCA", "KIRC",
 #' @format A character vector of length 3.
 #' @return A character vector of length 3.
 #' @examples
-#' default.pvalueType
+#' default_pvalueType
 #' @export
-default.pvalueType <- c("pos", "std", "neg")
+default_pvalueType <- c("pos", "std", "neg")
 
 #' Supported gene-gene interaction sources
 #'
@@ -82,9 +82,9 @@ default.pvalueType <- c("pos", "std", "neg")
 #' @format A character vector of length 2.
 #' @return A character vector of length 2.
 #' @examples
-#' default.GGI_source
+#' default_GGI_source
 #' @export
-default.GGI_source <- c("Omnipath", "Reactome")
+default_GGI_source <- c("Omnipath", "Reactome")
 
 #' @noRd
 snapshot_rng_state <- function() {

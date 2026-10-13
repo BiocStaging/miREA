@@ -8,7 +8,7 @@
 #' @param pathway A three-column dataframe contains pathway miRNA gene.
 #'@param background A character vector contains background MGIs in the format of [miRNA]:[gene].
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.

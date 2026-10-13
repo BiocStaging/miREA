@@ -3,7 +3,7 @@
 #' The main entry point for miREA, implementing four node-based methods and
 #' five edge-based methods for miRNA-oriented enrichment analysis.
 #'
-#' @param methods Method used for enrichment analysis, see default.method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").
+#' @param methods Method used for enrichment analysis, see default_method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").
 #' @param input_data Input data list. Contains all kind of input data for all methods, including data, pathway, pathway_GGI, GGI, dict_MGI. 
 #'        Use get_all_input_data() function to generate. You could also generate it by yourself.
 #'          input_data$data: each sub-element is named by the method, containing the input data format.
@@ -27,13 +27,13 @@
 #'                    If NULL, use the global background instead.
 #' @param minSize The minimum pathway set sizes allowed for analysis, filtering out pathways with number of members less than the minSize threshold.
 #' @param maxSize The maximum pathway set sizes allowed for analysis, filtering out pathways with number of members more than the maxSize threshold.
-#' @param pvalueType How to calculate p value. See default.pvalueType for all possible options. Default pvalueType is list(TG = "std", MiR = "std", Edge = "neg").
+#' @param pvalueType How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is list(TG = "std", MiR = "std", Edge = "neg").
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 #' The "std" is used when interseted both positive and negative scores, which is the same with the original GSEA algorithm.
 #' Only used in Score-based method (Edge_Score2D, Edge_TopoScore, TG_Score, MiR_Score).
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 1.
@@ -49,11 +49,13 @@
 #' (`result`), per-method elapsed time (`time`), the methods that completed
 #' without error (`valid_methods`), and the call parameters (`parameter`).
 #' Supports `$` access to these four fields for backward compatibility.
+#' @references Zhang Z, Lai X (2026). miREA: a network-based tool for
+#' microRNA-oriented enrichment analysis. bioRxiv. \doi{10.64898/2026.02.27.708509}
 #' @examples
 #' data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
 #' data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI); data(toy_background_GGI)
 #' input_data <- get_all_input_data(
-#'   methods = default.method_list, pathway = toy_pathway,
+#'   methods = default_method_list, pathway = toy_pathway,
 #'   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
 #'   background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
 #'   GGI_source = "Omnipath", gene_mat = toy_gene_mat, mir_mat = toy_mir_mat,
@@ -65,10 +67,10 @@
 #'   Edge = unique(paste0(toy_background_MGI$miRNA, ":", toy_background_MGI$gene))
 #' )
 #' result <- miREA(
-#'   methods = default.method_list, input_data = input_data, background = background,
-#'   minSize = 2, maxSize = 5000,
+#'   methods = default_method_list, input_data = input_data, background = background,
+#'   minSize = NULL, maxSize = NULL,
 #'   pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
-#'   pAdjMethod = "BH", pvalueCutoff = 1, iter = 100, ncores = 1
+#'   pAdjMethod = "BH", pvalueCutoff = 1, iter = 20, ncores = 1
 #' )
 #' result$valid_methods
 #' @export
@@ -76,13 +78,13 @@ miREA <- function(methods, input_data, background = NULL,
                   minSize = NULL, maxSize = NULL, pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
                   pAdjMethod = "BH", pvalueCutoff = 1, iter = 1000, ncores = NULL){
   if (!is.list(input_data)) stop("input_data must be a list!")
-  invalid_methods <- setdiff(methods, default.method_list)
+  invalid_methods <- setdiff(methods, default_method_list)
   if (length(invalid_methods) > 0){
     warning("Please check the methods you have input. These methods cannot be specified: ",
             paste(invalid_methods, collapse = ", "), ". They will be removed.\n")
-    methods <- intersect(methods, default.method_list)
+    methods <- intersect(methods, default_method_list)
     if (length(methods) == 0){
-      stop("No valid methods! Please select one or more from default.method_list!")
+      stop("No valid methods! Please select one or more from default_method_list!")
     }
   }
 

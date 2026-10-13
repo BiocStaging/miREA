@@ -6,7 +6,7 @@
 #' @param background A character vector contains background MGIs in the format of [miRNA]:[gene].
 #' @param pathway A three-column dataframe contains pathway miRNA gene.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -37,9 +37,9 @@ Edge_ORA <- function(DEMGI, background = NULL, pathway, pAdjMethod = "BH", pvalu
          "DEMGI is empty: no MGI passed the upstream differential-expression filters.")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
   if (is.null(background)){

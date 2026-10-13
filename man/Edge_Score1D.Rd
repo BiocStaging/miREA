@@ -19,13 +19,13 @@ Edge_Score1D(
 
 \item{pathway}{A three-column dataframe contains pathway, miRNA, gene.}
 
-\item{pvalueType}{How to calculate p value. See default.pvalueType for all possible options. Default pvalueType is "pos".
+\item{pvalueType}{How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 The "pos" and "neg" score types are intended to be used for one-tailed tests
 (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 The "std" is used when interested in both positive and negative scores.}
 
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-Use default.pAdjMethod to find all possible values.
+Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 If you don't want any adjustment, please set pAdjMethod = "none".}
 
@@ -51,7 +51,7 @@ input_data <- get_all_input_data(
 )
 res <- Edge_Score1D(
   MGIList = input_data$data$Edge_Score1D, pathway = input_data$pathway$Edge,
-  pvalueType = "neg", pvalueCutoff = 1
+  pvalueType = "neg", pvalueCutoff = 1, minSize = 2, maxSize = 5000
 )
 head(res)
 }

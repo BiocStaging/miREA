@@ -70,11 +70,13 @@ BiocManager::install("miREA")
 
 This vignette uses a small, self-contained example dataset bundled with the
 package (see `?miREA_example_data`), derived from the real bladder urothelial
-carcinoma (BLCA) data used in the miREA manuscript. It covers three MSigDB
-hallmark pathways and 200 TCGA samples — enough statistical power for every
-method, including the edge-based methods' stricter significance filters, to
-return real, non-empty results. For the full datasets used in the manuscript,
-see the [Zenodo deposit](https://zenodo.org/records/18803209).
+carcinoma (BLCA) data used in the miREA manuscript. It covers 16
+bladder-cancer-specific MSigDB gene sets and 99 TCGA samples (80 tumor + 19
+normal, used for differential expression; the 80 tumor samples are also used
+for miRNA-gene correlation) — enough statistical power for every method,
+including the edge-based methods' stricter significance filters, to return
+real, non-empty results. For the full datasets used in the manuscript, see
+the [Zenodo deposit](https://zenodo.org/records/18803209).
 
 ```{r load-data}
 library(miREA)
@@ -96,12 +98,12 @@ dim(toy_mir_mat)
 `get_all_input_data()` builds the method-specific input formats (DE gene/miRNA
 lists, ranked score vectors, MGI dictionaries, GGI networks, etc.) from the raw
 expression and differential-expression tables. Here we request all nine
-methods at once; see `?default.method_list` for the full list of supported
+methods at once; see `?default_method_list` for the full list of supported
 method names.
 
 ```{r get-input-data}
 input_data <- get_all_input_data(
-  methods = default.method_list,
+  methods = default_method_list,
   pathway = toy_pathway,
   mir_DEdata = toy_mir_DEdata,
   gene_DEdata = toy_gene_DEdata,
@@ -160,15 +162,15 @@ background <- list(
 )
 
 result <- miREA(
-  methods = default.method_list,
+  methods = default_method_list,
   input_data = input_data,
   background = background,
-  minSize = 2,
-  maxSize = 5000,
+  minSize = NULL,
+  maxSize = NULL,
   pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
   pAdjMethod = "BH",
   pvalueCutoff = 1,
-  iter = 100,
+  iter = 20,
   ncores = 1
 )
 result$valid_methods

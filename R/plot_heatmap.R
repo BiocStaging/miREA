@@ -20,24 +20,21 @@
 #' @return A heatmap plot either in the current window, or saved as heatmap_[method].pdf in the plot_path.
 #' @examples
 #' data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
-#' data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI); data(toy_background_GGI)
+#' data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI)
+#' # Edge_Score2D is included so input_data carries the MGI "strength" scores
+#' # plot_heatmap() needs for its heatmap cells, without running it in miREA().
 #' input_data <- get_all_input_data(
-#'   methods = default.method_list, pathway = toy_pathway,
+#'   methods = c("Edge_ORA", "Edge_Score2D"), pathway = toy_pathway,
 #'   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
-#'   background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
-#'   GGI_source = "Omnipath", gene_mat = toy_gene_mat, mir_mat = toy_mir_mat,
-#'   scoreFun = "rank"
+#'   background_MGI = toy_background_MGI,
+#'   gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"
 #' )
 #' background <- list(
-#'   TG = unique(toy_pathway$gene),
-#'   MiR = unique(input_data$pathway$MiR$miRNA),
 #'   Edge = unique(paste0(toy_background_MGI$miRNA, ":", toy_background_MGI$gene))
 #' )
 #' result <- miREA(
-#'   methods = default.method_list, input_data = input_data, background = background,
-#'   minSize = 2, maxSize = 5000,
-#'   pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
-#'   pAdjMethod = "BH", pvalueCutoff = 1, iter = 100, ncores = 1
+#'   methods = "Edge_ORA", input_data = input_data, background = background,
+#'   minSize = NULL, maxSize = NULL, pvalueCutoff = 1
 #' )
 #' plot_heatmap(method = "Edge_ORA", result = result, input_data = input_data, penrichCutoff = 1)
 #' @export

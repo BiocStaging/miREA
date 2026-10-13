@@ -6,7 +6,7 @@
 #' @param background A character vector contains background miRNAs.
 #' @param pathway A two-column dataframe contains pathway and their member miRNAs.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -32,9 +32,9 @@ MiR_ORA <- function(DEmiR, background = NULL, pathway, pAdjMethod = "BH", pvalue
     stop("A valid character vector contains the differential expressed miRNAs must be entered!")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
   if (is.null(background)){
@@ -75,12 +75,12 @@ MiR_ORA <- function(DEmiR, background = NULL, pathway, pAdjMethod = "BH", pvalue
 #'
 #' @param miRList A named vector shows the ranked score of miRNAs.
 #' @param pathway A two-column dataframe contains pathway and their member miRNAs.
-#' @param pvalueType ow to calculate p value. See default.pvalueType for all possible options. Default pvalueType is "pos".
+#' @param pvalueType ow to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 #' The "std" is used when interested in both positive and negative scores.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -109,9 +109,9 @@ MiR_Score <- function(miRList, pathway, pvalueType = "std", pAdjMethod = "BH", p
     stop("miRList must be a named number vector, where the name is miRNA, and the value is the ranked score!")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
   miRList <- sort(miRList, decreasing = TRUE, na.last = NA)

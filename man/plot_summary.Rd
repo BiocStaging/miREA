@@ -32,13 +32,13 @@ density plot.
 }
 \examples{
 data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
-data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI); data(toy_background_GGI)
+data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI)
+methods <- c("TG_ORA", "TG_Score", "MiR_ORA", "MiR_Score", "Edge_ORA")
 input_data <- get_all_input_data(
-  methods = default.method_list, pathway = toy_pathway,
+  methods = methods, pathway = toy_pathway,
   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
-  background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
-  GGI_source = "Omnipath", gene_mat = toy_gene_mat, mir_mat = toy_mir_mat,
-  scoreFun = "rank"
+  background_MGI = toy_background_MGI,
+  gene_mat = toy_gene_mat, mir_mat = toy_mir_mat
 )
 background <- list(
   TG = unique(toy_pathway$gene),
@@ -46,10 +46,10 @@ background <- list(
   Edge = unique(paste0(toy_background_MGI$miRNA, ":", toy_background_MGI$gene))
 )
 result <- miREA(
-  methods = default.method_list, input_data = input_data, background = background,
-  minSize = 2, maxSize = 5000,
+  methods = methods, input_data = input_data, background = background,
+  minSize = NULL, maxSize = NULL,
   pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
-  pAdjMethod = "BH", pvalueCutoff = 1, iter = 100, ncores = 1
+  pvalueCutoff = 1
 )
 plot_summary(result, penrichCutoff = 1)
 }

@@ -4,12 +4,12 @@
 #'
 #' @param MGIList A named vector shows the ranked score of MGIs.
 #' @param pathway A three-column dataframe contains pathway, miRNA, gene.
-#' @param pvalueType How to calculate p value. See default.pvalueType for all possible options. Default pvalueType is "pos".
+#' @param pvalueType How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 #' The "std" is used when interested in both positive and negative scores.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -26,7 +26,7 @@
 #' )
 #' res <- Edge_Score1D(
 #'   MGIList = input_data$data$Edge_Score1D, pathway = input_data$pathway$Edge,
-#'   pvalueType = "neg", pvalueCutoff = 1
+#'   pvalueType = "neg", pvalueCutoff = 1, minSize = 2, maxSize = 5000
 #' )
 #' head(res)
 #' @export
@@ -40,9 +40,9 @@ Edge_Score1D <- function(MGIList,  pathway, pvalueType = "neg", pAdjMethod = "BH
     stop("MGIList must be a named number vector, where the name is MGI, and the value is the ranked score!")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
   colnames(pathway)[seq_len(3)] <- c("pathway", "miRNA", "gene")

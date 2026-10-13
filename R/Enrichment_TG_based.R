@@ -6,7 +6,7 @@
 #' @param background A character vector contains background genes.
 #' @param pathway A two-column dataframe contains pathway and their member genes.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -35,9 +35,9 @@ TG_ORA <- function(TG, background = NULL, pathway, pAdjMethod = "BH", pvalueCuto
          "TG is empty: no genes passed the upstream differential-expression filters.")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
   colnames(pathway)[seq_len(2)] <- c("Term", "Gene")
@@ -57,12 +57,12 @@ TG_ORA <- function(TG, background = NULL, pathway, pAdjMethod = "BH", pvalueCuto
 #'
 #' @param geneList A named vector shows the ranked score of target genes.
 #' @param pathway A two-column dataframe contains pathway and their member genes.
-#' @param pvalueType ow to calculate p value. See default.pvalueType for all possible options. Default pvalueType is "pos".
+#' @param pvalueType ow to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 #' The "std" is used when interested in both positive and negative scores.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -91,9 +91,9 @@ TG_Score <- function(geneList, pathway, pvalueType = "std", pAdjMethod = "BH",  
     stop("geneList must be a named number vector, where the name is gene, and the value is the ranked score!")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
   geneList <- sort(geneList, decreasing = TRUE, na.last = NA)

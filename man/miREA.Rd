@@ -18,7 +18,7 @@ miREA(
 )
 }
 \arguments{
-\item{methods}{Method used for enrichment analysis, see default.method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").}
+\item{methods}{Method used for enrichment analysis, see default_method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").}
 
 \item{input_data}{Input data list. Contains all kind of input data for all methods, including data, pathway, pathway_GGI, GGI, dict_MGI. 
 Use get_all_input_data() function to generate. You could also generate it by yourself.
@@ -46,14 +46,14 @@ If NULL, use the global background instead.}
 
 \item{maxSize}{The maximum pathway set sizes allowed for analysis, filtering out pathways with number of members more than the maxSize threshold.}
 
-\item{pvalueType}{How to calculate p value. See default.pvalueType for all possible options. Default pvalueType is list(TG = "std", MiR = "std", Edge = "neg").
+\item{pvalueType}{How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is list(TG = "std", MiR = "std", Edge = "neg").
 The "pos" and "neg" score types are intended to be used for one-tailed tests
 (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 The "std" is used when interseted both positive and negative scores, which is the same with the original GSEA algorithm.
 Only used in Score-based method (Edge_Score2D, Edge_TopoScore, TG_Score, MiR_Score).}
 
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-Use default.pAdjMethod to find all possible values.
+Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 If you don't want any adjustment, please set pAdjMethod = "none".}
 
@@ -80,7 +80,7 @@ five edge-based methods for miRNA-oriented enrichment analysis.
 data(toy_pathway); data(toy_gene_DEdata); data(toy_mir_DEdata)
 data(toy_gene_mat); data(toy_mir_mat); data(toy_background_MGI); data(toy_background_GGI)
 input_data <- get_all_input_data(
-  methods = default.method_list, pathway = toy_pathway,
+  methods = default_method_list, pathway = toy_pathway,
   mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
   background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
   GGI_source = "Omnipath", gene_mat = toy_gene_mat, mir_mat = toy_mir_mat,
@@ -92,10 +92,14 @@ background <- list(
   Edge = unique(paste0(toy_background_MGI$miRNA, ":", toy_background_MGI$gene))
 )
 result <- miREA(
-  methods = default.method_list, input_data = input_data, background = background,
-  minSize = 2, maxSize = 5000,
+  methods = default_method_list, input_data = input_data, background = background,
+  minSize = NULL, maxSize = NULL,
   pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
-  pAdjMethod = "BH", pvalueCutoff = 1, iter = 100, ncores = 1
+  pAdjMethod = "BH", pvalueCutoff = 1, iter = 20, ncores = 1
 )
 result$valid_methods
+}
+\references{
+Zhang Z, Lai X (2026). miREA: a network-based tool for
+microRNA-oriented enrichment analysis. bioRxiv. \doi{10.64898/2026.02.27.708509}
 }

@@ -18,7 +18,7 @@ get_all_input_data(
 )
 }
 \arguments{
-\item{methods}{compulsory, see default.method_list for all supportive methods. You could either input one method, or a vector contains several methods you want to try.}
+\item{methods}{compulsory, see default_method_list for all supportive methods. You could either input one method, or a vector contains several methods you want to try.}
 
 \item{pathway}{compulsory. It should be a two-column pathway, containing pathway and gene, or a GSEABase GeneSetCollection object.}
 
@@ -36,7 +36,7 @@ get_all_input_data(
 
 \item{mir_mat}{optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw miRNA expression matrix (each row a miRNA, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.}
 
-\item{scoreFun}{optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default.scoreFun for all supportive methods.}
+\item{scoreFun}{optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default_scoreFun for all supportive methods.}
 }
 \value{
 A list that contains all the data formats needed for miREA.
@@ -56,7 +56,7 @@ data(toy_mir_mat)
 data(toy_background_MGI)
 data(toy_background_GGI)
 input_data <- get_all_input_data(
-  methods = default.method_list,
+  methods = default_method_list,
   pathway = toy_pathway,
   mir_DEdata = toy_mir_DEdata,
   gene_DEdata = toy_gene_DEdata,
@@ -68,4 +68,8 @@ input_data <- get_all_input_data(
   scoreFun = "rank"
 )
 names(input_data)
+}
+\references{
+Zhang Z, Lai X (2026). miREA: a network-based tool for
+microRNA-oriented enrichment analysis. bioRxiv. \doi{10.64898/2026.02.27.708509}
 }

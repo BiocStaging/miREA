@@ -6,7 +6,7 @@
 #' more topological importance inside the pathway.
 #'
 #' @param MGI A four-column dataframe, including MGI miRNA gene strength.
-#' @param pvalueType How to calculate p value. See default.pvalueType for all possible options. Default pvalueType is "pos".
+#' @param pvalueType How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 #' The "std" is used when interseted both positive and negative scores.
@@ -19,7 +19,7 @@
 #' @param maxSize The maximum MGI set sizes allowed for analysis, filtering out pathways with number of member MGIs more than the maxSize threshold.
 #' @param iter Number of iterations for permutation test.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #' @param ncores Number of cores for permutation test (parallel computing different pathways).
 #' @return A dataframe containing the enrichment result for Edge-Topology.
 #' @examples
@@ -37,7 +37,7 @@
 #'   MGI = input_data$data$Edge_Topology, background = background,
 #'   pathway = input_data$pathway$Edge, pathway_GGI = input_data$pathway_GGI,
 #'   dict_MGI = input_data$dict_MGI, pvalueType = "neg",
-#'   minSize = 2, maxSize = 5000, iter = 100, ncores = 1, pvalueCutoff = 1
+#'   minSize = 2, maxSize = 5000, iter = 20, ncores = 1, pvalueCutoff = 1
 #' )
 #' head(res)
 #' @export
@@ -49,14 +49,14 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
   restore_rng <- snapshot_rng_state()
   on.exit(restore_rng(), add = TRUE)
   # check pAdjMethod
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ", ")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ", ")))
   }
   # check pvalueType
-  if (!pvalueType %in% default.pvalueType){
+  if (!pvalueType %in% default_pvalueType){
     stop(paste("Invalid pvalueType:", pvalueType,
-               "\n Please choose one of:", paste(default.pvalueType, collapse = ", ")))
+               "\n Please choose one of:", paste(default_pvalueType, collapse = ", ")))
   }
 
   # filtering MGI in the background
@@ -311,8 +311,8 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, ct
   }
 
   # === Stepwise Permutation Process === #
-  iter1 <- max(10, ceiling(0.1 * iter))
-  iter2 <- max(50, ceiling(0.5 * iter))
+  iter1 <- min(iter, max(10, ceiling(0.1 * iter)))
+  iter2 <- min(iter, max(50, ceiling(0.5 * iter)))
   set.seed(12345)
   seeds_null <- sample(10000, iter, replace = FALSE)
 
@@ -333,6 +333,11 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, ct
     n_down <- n_down1
     nMoreExtreme <- n_extreme1
     nPerm <- iter1
+  } else if (iter2 <= iter1) {
+    n_up <- n_up1
+    n_down <- n_down1
+    nMoreExtreme <- n_extreme1
+    nPerm <- iter1
   } else {
     s_random2 <- vapply((iter1 + 1):iter2, compute_random_score, numeric(1))
     s_random <- c(s_random1, s_random2)
@@ -344,7 +349,7 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, ct
       "neg" = n_down2,
       "std" = min(n_up2, n_down2)
     )
-    if (n_extreme2 > 0.1 * iter2){
+    if (n_extreme2 > 0.1 * iter2 || iter <= iter2){
       n_up <- n_up2
       n_down <- n_down2
       nMoreExtreme <- n_extreme2

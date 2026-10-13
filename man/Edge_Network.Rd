@@ -33,7 +33,7 @@ Edge_Network(
 \item{GGI}{A two-column dataframe, including GGIs across all DEMGIs and pathways, including internal GGIs and GGIs linking different pathways and DEMGIs.}
 
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-Use default.pAdjMethod to find all possible values.
+Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 If you don't want any adjustment, please set pAdjMethod = "none".}
 
@@ -69,7 +69,7 @@ res <- Edge_Network(
   DEMGI = input_data$data$Edge_Network, pathway_gene = input_data$pathway$TG,
   pathway_MGI = input_data$pathway$Edge, pathway_GGI = input_data$pathway_GGI,
   MGI = input_data$MGI, GGI = input_data$GGI,
-  minSize = 2, maxSize = 5000, iter = 100, ncores = 1, pvalueCutoff = 1
+  minSize = 2, maxSize = 5000, iter = 20, ncores = 1, pvalueCutoff = 1
 )
 head(res)
 }

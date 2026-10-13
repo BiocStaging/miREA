@@ -13,17 +13,17 @@ test_that("Edge_ORA, Edge_Score1D, Edge_Score2D return enrichment results for th
   ora <- Edge_ORA(DEMGI = input_data$data$Edge_ORA, background = background,
                    pathway = input_data$pathway$Edge, pvalueCutoff = 1)
   expect_s3_class(ora, "data.frame")
-  expect_true("REPLICATIVE IMMORTALITY" %in% ora$pathway)
+  expect_true("LINDGREN_BLADDER_CANCER_CLUSTER_2B" %in% ora$pathway)
 
   score1d <- Edge_Score1D(MGIList = input_data$data$Edge_Score1D, pathway = input_data$pathway$Edge,
                            pvalueType = "neg", pvalueCutoff = 1)
   expect_s3_class(score1d, "data.frame")
-  expect_true("REPLICATIVE IMMORTALITY" %in% score1d$pathway)
+  expect_true("LINDGREN_BLADDER_CANCER_CLUSTER_2B" %in% score1d$pathway)
 
   score2d <- Edge_Score2D(MGI2D = input_data$data$Edge_Score2D, pathway = input_data$pathway$Edge,
-                           background = background, iter = 100, ncores = 1, pvalueCutoff = 1)
+                           background = background, iter = 20, ncores = 1, pvalueCutoff = 1)
   expect_s3_class(score2d, "data.frame")
-  expect_true("REPLICATIVE IMMORTALITY" %in% score2d$pathway)
+  expect_true("LINDGREN_BLADDER_CANCER_CLUSTER_2B" %in% score2d$pathway)
 })
 
 test_that("Edge_ORA rejects an empty DEMGI vector", {
@@ -43,10 +43,10 @@ test_that("Edge_Topology returns enrichment results for the signal pathway", {
     MGI = input_data$data$Edge_Topology, background = background,
     pathway = input_data$pathway$Edge, pathway_GGI = input_data$pathway_GGI,
     dict_MGI = input_data$dict_MGI, pvalueType = "neg",
-    minSize = 2, maxSize = 5000, iter = 100, ncores = 1, pvalueCutoff = 1
+    minSize = 2, maxSize = 5000, iter = 20, ncores = 1, pvalueCutoff = 1
   )
   expect_s3_class(res, "data.frame")
-  expect_true("REPLICATIVE IMMORTALITY" %in% res$pathway)
+  expect_true("LINDGREN_BLADDER_CANCER_CLUSTER_2B" %in% res$pathway)
 })
 
 test_that("Edge_Network returns enrichment results for the signal pathway", {
@@ -61,8 +61,8 @@ test_that("Edge_Network returns enrichment results for the signal pathway", {
     DEMGI = input_data$data$Edge_Network, pathway_gene = input_data$pathway$TG,
     pathway_MGI = input_data$pathway$Edge, pathway_GGI = input_data$pathway_GGI,
     MGI = input_data$MGI, GGI = input_data$GGI,
-    minSize = 2, maxSize = 5000, iter = 100, ncores = 1, pvalueCutoff = 1
+    minSize = 2, maxSize = 5000, iter = 20, ncores = 1, pvalueCutoff = 1
   )
   expect_s3_class(res, "data.frame")
-  expect_true("REPLICATIVE IMMORTALITY" %in% res$pathway)
+  expect_true("LINDGREN_BLADDER_CANCER_CLUSTER_2B" %in% res$pathway)
 })

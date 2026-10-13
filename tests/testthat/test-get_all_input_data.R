@@ -3,7 +3,7 @@ data(toy_pathway, toy_gene_DEdata, toy_mir_DEdata, toy_gene_mat, toy_mir_mat,
 
 test_that("get_all_input_data() builds all expected components for the full method list", {
   input_data <- get_all_input_data(
-    methods = default.method_list,
+    methods = default_method_list,
     pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata,
     gene_DEdata = toy_gene_DEdata,
@@ -17,7 +17,7 @@ test_that("get_all_input_data() builds all expected components for the full meth
 
   expect_type(input_data, "list")
   expect_true(all(c("data", "pathway", "pathway_GGI", "GGI", "MGI", "dict_MGI") %in% names(input_data)))
-  expect_true(all(default.method_list %in% names(input_data$data)))
+  expect_true(all(default_method_list %in% names(input_data$data)))
   expect_s3_class(input_data$dict_MGI, "data.frame")
   expect_true(nrow(input_data$dict_MGI) > 0)
 })
@@ -53,13 +53,13 @@ test_that("get_all_input_data() accepts SummarizedExperiment and GeneSetCollecti
   }, split(toy_pathway$gene, toy_pathway$pathway), names(split(toy_pathway$gene, toy_pathway$pathway))))
 
   input_data_std <- get_all_input_data(
-    methods = default.method_list, pathway = toy_pathway,
+    methods = default_method_list, pathway = toy_pathway,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
     gene_mat = toy_gene_mat, mir_mat = toy_mir_mat, scoreFun = "rank"
   )
   input_data_bioc <- get_all_input_data(
-    methods = default.method_list, pathway = pathway_gsc,
+    methods = default_method_list, pathway = pathway_gsc,
     mir_DEdata = toy_mir_DEdata, gene_DEdata = toy_gene_DEdata,
     background_MGI = toy_background_MGI, background_GGI = toy_background_GGI,
     gene_mat = gene_se, mir_mat = mir_se, scoreFun = "rank"

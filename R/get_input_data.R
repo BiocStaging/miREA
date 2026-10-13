@@ -6,7 +6,7 @@
 #'
 #' Functions to generate input data for miREA, based on the original expression and differential expression results for miRNAs and genes.
 #'
-#' @param methods compulsory, see default.method_list for all supportive methods. You could either input one method, or a vector contains several methods you want to try.
+#' @param methods compulsory, see default_method_list for all supportive methods. You could either input one method, or a vector contains several methods you want to try.
 #' @param pathway compulsory. It should be a two-column pathway, containing pathway and gene, or a GSEABase GeneSetCollection object.
 #' @param mir_DEdata compulsory, should be a four-column dataframe, containing miRNA, log2FC, stat, padj
 #' @param gene_DEdata optional, except for TG-ORA, MiR-ORA, and MiR-Score methods, should be a four-column dataframe, containing gene, log2FC, stat, padj
@@ -15,9 +15,11 @@
 #' @param GGI_source optional, select from "Omnipath" or "Reactome".if you don't have specified background_GGI and neither GGI_source. The default Omnipath will be used.
 #' @param gene_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw gene expression matrix (each row a gene, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.
 #' @param mir_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw miRNA expression matrix (each row a miRNA, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.
-#' @param scoreFun optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default.scoreFun for all supportive methods.
+#' @param scoreFun optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default_scoreFun for all supportive methods.
 #' @note gene_mat and mir_mat should have same sample name format. If the number of shared samples below 50 % of the minimum of gene samples and miRNA samples, a warning would happen to remind you recheck them.
 #' @return A list that contains all the data formats needed for miREA.
+#' @references Zhang Z, Lai X (2026). miREA: a network-based tool for
+#' microRNA-oriented enrichment analysis. bioRxiv. \doi{10.64898/2026.02.27.708509}
 #' @examples
 #' data(toy_pathway)
 #' data(toy_gene_DEdata)
@@ -27,7 +29,7 @@
 #' data(toy_background_MGI)
 #' data(toy_background_GGI)
 #' input_data <- get_all_input_data(
-#'   methods = default.method_list,
+#'   methods = default_method_list,
 #'   pathway = toy_pathway,
 #'   mir_DEdata = toy_mir_DEdata,
 #'   gene_DEdata = toy_gene_DEdata,
@@ -60,8 +62,8 @@ get_all_input_data <- function(methods, pathway,
     warning("No [scoreFun] parameter has been specified. Use the default [rank] instead!\n")
     scoreFun <- "rank"
   }
-  if (length(intersect(score_method, methods)) > 0 && (! scoreFun %in% default.scoreFun)){
-    stop("The [scoreFun] you input is not valid. Please select one from the default.scoreFun!")
+  if (length(intersect(score_method, methods)) > 0 && (! scoreFun %in% default_scoreFun)){
+    stop("The [scoreFun] you input is not valid. Please select one from the default_scoreFun!")
   }
 
   result <- list()
@@ -82,8 +84,8 @@ get_all_input_data <- function(methods, pathway,
   # check background_GGI
   if (length(intersect(target_method, methods)) != 0){
     if (is.null(background_GGI)){
-      if (! GGI_source %in% default.GGI_source){
-        stop("You tend to extract default background_GGI for", GGI_source,". But [GGI_source] you have specified are not involved. Please use default.GGI_source() to see all supporting options!")
+      if (! GGI_source %in% default_GGI_source){
+        stop("You tend to extract default background_GGI for", GGI_source,". But [GGI_source] you have specified are not involved. Please use default_GGI_source() to see all supporting options!")
       }
       warning("No background_GGI is given. Use global GGI list from ", GGI_source, " instead.\n")
       load(paste0("data/raw_data/background/background_GGI_", GGI_source, ".RData"))
@@ -203,7 +205,7 @@ get_all_input_data <- function(methods, pathway,
 # will return a list, contains the input of each method
 get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
                      background_MGI, gene_mat = NULL, mir_mat = NULL, scoreFun){
-  invalid_method <- base::setdiff(methods, default.method_list)
+  invalid_method <- base::setdiff(methods, default_method_list)
   if (length(invalid_method) > 0){
     stop("The method(s):", invalid_method, "you are input is(are) not one of the supportive methods. Please revise the method(s)!")
   }

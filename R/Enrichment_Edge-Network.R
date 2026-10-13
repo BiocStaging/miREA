@@ -11,7 +11,7 @@
 #' @param MGI A two-column dataframe, including MGIs across all DEMGIs and pathways built from background.
 #' @param GGI A two-column dataframe, including GGIs across all DEMGIs and pathways, including internal GGIs and GGIs linking different pathways and DEMGIs.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
-#'        Use default.pAdjMethod to find all possible values.
+#'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
 #'        If you don't want any adjustment, please set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
@@ -34,7 +34,7 @@
 #'   DEMGI = input_data$data$Edge_Network, pathway_gene = input_data$pathway$TG,
 #'   pathway_MGI = input_data$pathway$Edge, pathway_GGI = input_data$pathway_GGI,
 #'   MGI = input_data$MGI, GGI = input_data$GGI,
-#'   minSize = 2, maxSize = 5000, iter = 100, ncores = 1, pvalueCutoff = 1
+#'   minSize = 2, maxSize = 5000, iter = 20, ncores = 1, pvalueCutoff = 1
 #' )
 #' head(res)
 #' @export
@@ -54,9 +54,9 @@ Edge_Network <- function(DEMGI,
     stop("A valid character DEMGI vector contains the differential expressed MGI must be entered!")
   }
 
-  if (!pAdjMethod %in% default.pAdjMethod){
+  if (!pAdjMethod %in% default_pAdjMethod){
     stop(paste("Invalid pAdjMethod:", pAdjMethod,
-               "\n Please choose one of:", paste(default.pAdjMethod, collapse = ",")))
+               "\n Please choose one of:", paste(default_pAdjMethod, collapse = ",")))
   }
 
 
