@@ -314,6 +314,7 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter){
     nMoreExtreme <- n_extreme1
     nPerm <- iter1
   } else if (iter2 <= iter1) {
+    s_random <- s_random1
     n_up <- n_up1
     n_down <- n_down1
     nMoreExtreme <- n_extreme1
