@@ -201,7 +201,7 @@ miREA <- function(methods, input_data, background = NULL,
       time <- rbind(time, data.frame(method = "TG_ORA", time = time_TG_ORA[["elapsed"]], stringsAsFactors = FALSE))
       message("    - TG_ORA finished, time cost: ", time_TG_ORA[["elapsed"]], " s. ")
     }}, error = function(e) {
-      message("TG_ORA error: ", e$message)
+      warning("TG_ORA failed: ", e$message)
     })
   tryCatch({
     if ("TG_Score" %in% methods){
@@ -215,7 +215,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - TG_Score finished, time cost: ", time_TG_Score[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("TG_Score error: ", e$message)
+    warning("TG_Score failed: ", e$message)
   })
   tryCatch({
     if ("MiR_ORA" %in% methods){
@@ -228,7 +228,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - MiR_ORA finished, time cost: ", time_MiR_ORA[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("MiR_ORA error: ", e$message)
+    warning("MiR_ORA failed: ", e$message)
   })
   tryCatch({
     if ("MiR_Score" %in% methods){
@@ -241,7 +241,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - MiR_Score finished, time cost: ", time_MiR_Score[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("MiR_Score error: ", e$message)
+    warning("MiR_Score failed: ", e$message)
   })
   tryCatch({
     if ("Edge_ORA" %in% methods){
@@ -254,7 +254,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - Edge_ORA finished, time cost: ", time_Edge_ORA[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("Edge_ORA error: ", e$message)
+    warning("Edge_ORA failed: ", e$message)
   })
   tryCatch({
     if ("Edge_Score1D" %in% methods){
@@ -267,7 +267,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - Edge_Score1D finished, time cost: ", time_Edge_Score1D[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("Edge_Score1D error: ", e$message)
+    warning("Edge_Score1D failed: ", e$message)
   })
   tryCatch({
     if ("Edge_Score2D" %in% methods){
@@ -280,7 +280,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - Edge_Score2D finished, time cost: ", time_Edge_Score2D[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("Edge_Score2D error: ", e$message)
+    warning("Edge_Score2D failed: ", e$message)
   })
   tryCatch({
     if ("Edge_Topology" %in% methods){
@@ -294,7 +294,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - Edge_Topology finished, time cost: ", time_Edge_Topology[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("Edge_Topology error: ", e$message)
+    warning("Edge_Topology failed: ", e$message)
   })
   tryCatch({
     if ("Edge_Network" %in% methods){
@@ -310,7 +310,7 @@ miREA <- function(methods, input_data, background = NULL,
       message("    - Edge_Network finished, time cost: ", time_Edge_Network[["elapsed"]], " s. ")
     }
   }, error = function(e) {
-    message("Edge_Network error: ", e$message)
+    warning("Edge_Network failed: ", e$message)
   })
 
   message("\nmiREA analysis have finished!...")

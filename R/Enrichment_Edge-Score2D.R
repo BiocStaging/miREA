@@ -119,7 +119,7 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
       r_random_list[[as.character(size)]] <- unlist(lapply(seq_len(iter), compute_random_r, size = size, r_all = r_all))
     }} else {
       random_core <- min(ncores, length(unique_sizes))
-      cl <- parallel::makeCluster(random_core, type = "SOCK")
+      cl <- parallel::makeCluster(random_core)
       on.exit(parallel::stopCluster(cl), add = TRUE)
       parallel::clusterExport(cl, c("compute_random_r", "r_all", "iter", "seeds_null"), envir = environment())
       size_groups <- split(unique_sizes,
