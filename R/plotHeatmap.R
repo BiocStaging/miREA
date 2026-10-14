@@ -5,8 +5,8 @@
 #' Only supports one method each time.
 #'
 #' @param method a character that specifies only one method which you have the corresponding enrichment result (only five edge-based methods are supported).
-#' @param result the output of miREA() function. Just use the unprocessed result list as the input here.
-#' @param input_data the output of getAllInputData() function. Just use the unprocessed input_data list as the input here.
+#' @param result the output of miREA() function, used here as the unprocessed result list.
+#' @param input_data the output of getAllInputData() function, used here as the unprocessed input_data list.
 #' @param n_mir_heatmap The number of miRNAs included in the heatmap. Default is 10.
 #' @param n_pathway The number of top enriched pathways included in the heatmap. Default it 10. If the number of enriched pathways is less than n_pathway, all enriched pathways will be included.
 #' @param plot_path The directory to save the plot. If not null, it will generate a pdf file named heatmap_[method].pdf at the plot path. If null, the plot will be drawn at the current window.

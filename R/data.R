@@ -3,7 +3,7 @@
 #' A small, self-contained example dataset derived from the real BLCA
 #' (bladder urothelial carcinoma) data used in the miREA manuscript. Gene and
 #' miRNA differential expression are computed (DESeq2, tumor vs. normal) from
-#' 80 tumor + 19 normal TCGA samples; the resulting DE-testable gene/miRNA
+#' 80 tumor + 19 normal TCGA samples. The resulting DE-testable gene/miRNA
 #' universe is used to subset 16 bladder-cancer-specific MSigDB gene sets
 #' (e.g. KEGG_BLADDER_CANCER, LINDGREN_BLADDER_CANCER_*) and the
 #' manuscript's background_MGI/background_GGI. 80 tumor samples is the

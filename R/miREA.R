@@ -4,7 +4,7 @@
 #' five edge-based methods for miRNA-oriented enrichment analysis.
 #'
 #' @param methods Method used for enrichment analysis, see default_method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").
-#' @param input_data Input data list. Contains all kind of input data for all methods, including data, pathway, pathway_GGI, GGI, dict_MGI. 
+#' @param input_data Input data list, containing the input data for all methods, including data, pathway, pathway_GGI, GGI, and dict_MGI.
 #'        Use getAllInputData() function to generate. You could also generate it by yourself.
 #'          input_data$data: each sub-element is named by the method, containing the input data format.
 #'            TG_ORA: DEG, MiR_ORA: DEmiR, Edge_ORA: DEMGI, Edge_Network: DEMGI
@@ -30,12 +30,12 @@
 #' @param pvalueType How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is list(TG = "std", MiR = "std", Edge = "neg").
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
-#' The "std" is used when interseted both positive and negative scores, which is the same with the original GSEA algorithm.
+#' The "std" is used when interested in both positive and negative scores, which is the same as the original GSEA algorithm.
 #' Only used in Score-based method (Edge_Score2D, Edge_TopoScore, TG_Score, MiR_Score).
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 #'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-#'        If you don't want any adjustment, please set pAdjMethod = "none".
+#'        If no adjustment is desired, set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 1.
 #' @param iter Number of iteractions when perform permutation test. Default iter is 1000.
 #' @param ncores Number of cores for parallel computing. Only useful if methods contain Edge_Score2D, Edge_Topology, and Edge_Network.

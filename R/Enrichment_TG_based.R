@@ -8,11 +8,11 @@
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 #'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-#'        If you don't want any adjustment, please set pAdjMethod = "none".
+#'        If no adjustment is desired, set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
 #' @param minSize The minimum gene set sizes allowed for analysis, filtering out pathways with number of member genes less than the minSize threshold.
 #' @param maxSize The maximum gene set sizes allowed for analysis, filtering out pathways with number of member genes more than the maxSize threshold.
-#' @return A dataframe containing the enrichment result for TG-Score.
+#' @return A dataframe containing the enrichment result for TG-ORA.
 #' @examples
 #' data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata); data(toy_background_MGI)
 #' input_data <- getAllInputData(
@@ -57,14 +57,14 @@ TG_ORA <- function(TG, background = NULL, pathway, pAdjMethod = "BH", pvalueCuto
 #'
 #' @param geneList A named vector shows the ranked score of target genes.
 #' @param pathway A two-column dataframe contains pathway and their member genes.
-#' @param pvalueType ow to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
+#' @param pvalueType How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 #' The "std" is used when interested in both positive and negative scores.
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 #'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-#'        If you don't want any adjustment, please set pAdjMethod = "none".
+#'        If no adjustment is desired, set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
 #' @param minSize The minimum gene set sizes allowed for analysis, filtering out pathways with number of member genes less than the minSize threshold.
 #' @param maxSize The maximum gene set sizes allowed for analysis, filtering out pathways with number of member genes more than the maxSize threshold.

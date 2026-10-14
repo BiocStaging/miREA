@@ -12,7 +12,7 @@
 #' @param gene_DEdata optional, except for TG-ORA, MiR-ORA, and MiR-Score methods, should be a four-column dataframe, containing gene, log2FC, stat, padj
 #' @param background_MGI required for MiR_ and Edge_ methods. It should be either a character vector in the format of [miRNA]:[gene], or a two-column dataframe, containing miRNA gene. miREA does not ship a bundled default.
 #' @param background_GGI optional, it should be a two-column data frame that contains source gene and target gene. Combined with *GGI_source*. If NULL, we would use GGI_source to determine the background GGIs.
-#' @param GGI_source optional, select from "Omnipath" or "Reactome".if you don't have specified background_GGI and neither GGI_source. The default Omnipath will be used.
+#' @param GGI_source optional, select from "Omnipath" or "Reactome". Used when background_GGI is not provided. The default is Omnipath.
 #' @param gene_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw gene expression matrix (each row a gene, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.
 #' @param mir_mat optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw miRNA expression matrix (each row a miRNA, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.
 #' @param scoreFun optional, needed for Edge_Score1D, Edge_Score2D, Edge_Topology. See default_scoreFun for all supportive methods.

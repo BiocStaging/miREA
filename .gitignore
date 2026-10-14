@@ -13,3 +13,4 @@ vignettes/*.html
 vignettes/*.R
 vignettes/auto/
 .DS_Store
+Rplots.pdf

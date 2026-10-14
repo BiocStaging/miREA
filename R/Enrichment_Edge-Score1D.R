@@ -11,7 +11,7 @@
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 #'        Use default_pAdjMethod to find all possible values.
 #'        If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-#'        If you don't want any adjustment, please set pAdjMethod = "none".
+#'        If no adjustment is desired, set pAdjMethod = "none".
 #' @param pvalueCutoff The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.
 #' @param minSize The minimum MGI set sizes allowed for analysis, filtering out pathways with number of member MGIs less than the minSize threshold.
 #' @param maxSize The maximum MGI set sizes allowed for analysis, filtering out pathways with number of member MGIs more than the maxSize threshold.

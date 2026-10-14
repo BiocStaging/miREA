@@ -9,7 +9,7 @@
 #' miREA methods: a positive-rate/PCA/pairwise-overlap panel, and a p-value
 #' density plot.
 #'
-#' @param result the output of miREA() function. Just use the unprocessed result list as the input here.
+#' @param result the output of miREA() function, used here as the unprocessed result list.
 #' @param plot_path The directory to save the plot. If not null, it will generate two pdf file named summary.pdf and pvalue_density.pdf at the plot path. If null, the plot will be drawn at the current window.
 #' @param penrichCutoff  The threshold for deciding enrichment of pathways. Default is 0.05.
 #' @param fill_col a named vector to specify fill colors for different methods.

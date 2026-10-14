@@ -44,18 +44,29 @@ visualize results with `plotSummary()`, `plotHeatmap()`, or
 
 Several Bioconductor/CRAN packages address related but distinct questions.
 `r BiocStyle::Biocpkg("clusterProfiler")` performs over-representation and
-gene set enrichment analysis, but for gene enrichment analysis: it tests a 
+gene set enrichment analysis, but for gene enrichment analysis. It tests a 
 list of genes against pathway gene sets, with no special focus on miRNAs. 
-`r BiocStyle::Biocpkg("SPIA")` incorporates pathway topology but operates 
-purely on gene-level differential expression, with no miRNA layer.
+`r BiocStyle::CRANpkg("CePa")` incorporates pathway topology via node
+centrality measures but operates purely on gene-level and node-level, with 
+no focus on miRNAs as well.
 `r BiocStyle::Biocpkg("multiMiR")` and similar miRNA-target database
 packages retrieve curated or predicted miRNA-gene interactions but do not
-provide an enrichment/significance-testing framework over them. miREA is, to our knowledge, the only package that
-models miRNA-gene interactions as first-class edges throughout testing
-(over-representation, scoring, topology, and network propagation alike),
-which is the gap it is designed to fill; internally its ORA and GSEA-style
-methods (`TG_ORA`, `MiR_ORA`, `Edge_ORA`, `TG_Score`, `MiR_Score`,
-`Edge_Score1D`) reuse `r BiocStyle::Biocpkg("clusterProfiler")`'s
+provide an enrichment/significance-testing framework over them.
+`r BiocStyle::Biocpkg("miRNApath")` performs over-representation analysis
+by expanding each miRNA-gene pair into its own hypergeometric test unit,
+using a single ORA-style method.
+`r BiocStyle::Biocpkg("MIRit")` is a comprehensive, actively maintained
+framework for integrative miRNA-mRNA analysis, covering differential
+expression, correlation-based integration, and gene-set enrichment of
+miRNA targets.
+Here, we present miREA, to our knowledge the first miRNA-oriented
+enrichment package that adopts an MGI (miRNA-gene interaction)
+edge-centric enrichment. It spans over-representation, scoring,
+topology-aware, and network-propagation methods, and uses
+expression-informed edge scores rather than a plain membership test to
+characterize miRNA function at the pathway level. Internally, its ORA and
+GSEA-style methods (`TG_ORA`, `MiR_ORA`, `Edge_ORA`, `TG_Score`,
+`MiR_Score`, `Edge_Score1D`) reuse `r BiocStyle::Biocpkg("clusterProfiler")`'s
 `enricher()`/`GSEA()` rather than reimplementing them.
 
 # Installation
@@ -71,11 +82,12 @@ BiocManager::install("miREA")
 This vignette uses a small, self-contained example dataset bundled with the
 package (see `?miREA_example_data`), derived from the real bladder urothelial
 carcinoma (BLCA) data used in the miREA manuscript. It covers 16
-bladder-cancer-specific MSigDB gene sets and 99 TCGA samples (80 tumor + 19
-normal, used for differential expression; the 80 tumor samples are also used
-for miRNA-gene correlation) — enough statistical power for every method,
-including the edge-based methods' stricter significance filters, to return
-real, non-empty results. For the full datasets used in the manuscript, see
+bladder-cancer-specific MSigDB gene sets and 99 TCGA samples (80 tumor and 19
+normal, used for differential expression). The 80 tumor samples are also used
+for miRNA-gene correlation. This sample size provides enough statistical
+power for every method, including the edge-based methods' stricter
+significance filters, to return real, non-empty results. For the full
+datasets used in the manuscript, see
 the [Zenodo deposit](https://zenodo.org/records/18803209).
 
 ```{r load-data}
@@ -98,7 +110,7 @@ dim(toy_mir_mat)
 `getAllInputData()` builds the method-specific input formats (DE gene/miRNA
 lists, ranked score vectors, MGI dictionaries, GGI networks, etc.) from the raw
 expression and differential-expression tables. Here we request all nine
-methods at once; see `?default_method_list` for the full list of supported
+methods at once. See `?default_method_list` for the full list of supported
 method names.
 
 ```{r get-input-data}
@@ -150,7 +162,7 @@ identical(input_data_bioc$data$Edge_ORA, input_data$data$Edge_ORA)
 
 `miREA()` requires a `background` for each target (`TG`, `MiR`, `Edge`) unless
 you already supplied one via `getAllInputData()`'s `background_MGI`. miREA
-does not ship a bundled default background — build one from your own
+does not ship a bundled default background. Build one from your own
 background_MGI/background_GGI, or download the full background used in the
 manuscript from the Zenodo deposit linked above.
 
@@ -176,7 +188,7 @@ result <- miREA(
 result$valid_methods
 ```
 
-`miREA()` returns a `miREAResult` object: a lightweight S4 container for the
+`miREA()` returns a `miREAResult` object, a lightweight S4 container for the
 per-method result tables, elapsed times, and call parameters, with `$` access
 kept for the four fields above for convenience.
 
@@ -198,9 +210,9 @@ All per-method results can also be flattened into a single dataframe (with a
 head(as.data.frame(result))
 ```
 
-Note: `pvalueCutoff = 1` is used throughout this vignette purely so every
+Note that `pvalueCutoff = 1` is used throughout this vignette purely so every
 pathway (not just significant ones) appears in the small example dataset's
-output — in a real analysis you would typically use the default (`0.05`) or
+output. In a real analysis you would typically use the default (`0.05`) or
 another threshold appropriate to your study.
 
 # Step 3: Visualize results
@@ -230,13 +242,13 @@ plotHeatmapSankey(method = "Edge_ORA", result = result, input_data = input_data,
 
 # Choosing methods for your own data
 
-miREA supports 4 node-based and 5 edge-based methods; you do not need to run
+miREA supports 4 node-based and 5 edge-based methods. You do not need to run
 all nine. Select the method(s) most appropriate for your dataset and research
-question — see the method performance comparisons in the miREA manuscript
+question. See the method performance comparisons in the miREA manuscript
 (`r BiocStyle::Biocpkg("miREA")`'s companion
 [bioRxiv preprint](https://doi.org/10.64898/2026.02.27.708509)) for guidance.
 `Edge_Topology` in particular can be computationally expensive on large,
-real-sized pathway/background data; consider excluding it or increasing
+real-sized pathway/background data. Consider excluding it or increasing
 `ncores` for large analyses.
 
 # Session info

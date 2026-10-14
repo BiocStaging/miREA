@@ -5,8 +5,8 @@
 #' miRNA-gene-pathway flow. Only supports one method each time.
 #'
 #' @param method a character that specifies only one method which you have the corresponding enrichment result (only five edge-based methods are supported).
-#' @param result the output of miREA() function. Just use the unprocessed result list as the input here.
-#' @param input_data the output of getAllInputData() function. Just use the unprocessed input_data list as the input here.
+#' @param result the output of miREA() function, used here as the unprocessed result list.
+#' @param input_data the output of getAllInputData() function, used here as the unprocessed input_data list.
 #' @param n_mir_heatmap The number of miRNAs included in the heatmap. Default is 20.
 #' @param n_mir_sankey The number of miRNAs included in the Sankey diagram. Default is 10.
 #' @param n_pathway The number of top enriched pathways included in the heatmap. Default it 10. If the number of enriched pathways is less than n_pathway, all enriched pathways will be included.

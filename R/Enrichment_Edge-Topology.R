@@ -9,7 +9,7 @@
 #' @param pvalueType How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 #' The "pos" and "neg" score types are intended to be used for one-tailed tests
 #' (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
-#' The "std" is used when interseted both positive and negative scores.
+#' The "std" is used when interested in both positive and negative scores.
 #' @param background A character vector contains background MGI in the format of [miRNA]:[gene].
 #' @param pathway A three-column dataframe, including pathway, miRNA, gene. Equals to input_data$pathway$Edge.
 #' @param pathway_GGI A three column dataframe, including pathway, from, to. Equals to input_data$pathway_GGI.
