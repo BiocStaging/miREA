@@ -84,10 +84,7 @@ package (see `?miREA_example_data`), derived from the real bladder urothelial
 carcinoma (BLCA) data used in the miREA manuscript. It covers 16
 bladder-cancer-specific MSigDB gene sets and 99 TCGA samples (80 tumor and 19
 normal, used for differential expression). The 80 tumor samples are also used
-for miRNA-gene correlation. This sample size provides enough statistical
-power for every method, including the edge-based methods' stricter
-significance filters, to return real, non-empty results. For the full
-datasets used in the manuscript, see
+for miRNA-gene correlation. For the full datasets used in the manuscript, see
 the [Zenodo deposit](https://zenodo.org/records/18803209).
 
 ```{r load-data}
@@ -210,10 +207,13 @@ All per-method results can also be flattened into a single dataframe (with a
 head(as.data.frame(result))
 ```
 
-Note that `pvalueCutoff = 1` is used throughout this vignette purely so every
-pathway (not just significant ones) appears in the small example dataset's
-output. In a real analysis you would typically use the default (`0.05`) or
-another threshold appropriate to your study.
+Each method only reports pathways with pvalue and padj below `pvalueCutoff`.
+We use `pvalueCutoff = 1` throughout this vignette so every pathway is
+returned. The exception is the ORA methods (`TG_ORA`, `MiR_ORA`, `Edge_ORA`).
+These methods only report pathways with at least one overlapping
+differentially expressed gene, miRNA, or edge, so some pathways can still be
+missing even at `pvalueCutoff = 1`. For example, `Edge_ORA` returns 9 of 16
+pathways here.
 
 # Step 3: Visualize results
 
@@ -222,22 +222,23 @@ enrichment rates, a PCA of per-method pathway rankings, pairwise overlap
 between methods, and a p-value density plot.
 
 ```{r plot-summary, fig.width = 10, fig.height = 6}
-plotSummary(result, penrichCutoff = 1)
+plotSummary(result, penrichCutoff = 0.05)
 ```
 
 `plotHeatmap()` and `plotHeatmapSankey()` visualize a single edge-based
 method's result as a miRNA-by-gene heatmap (optionally combined with a Sankey
 diagram showing the miRNA-gene-pathway flow). Only the five edge-based methods
-are supported, one at a time.
+are supported, one at a time. 
 
-```{r plot-heatmap, fig.width = 8, fig.height = 8}
-plotHeatmap(method = "Edge_ORA", result = result, input_data = input_data,
-             penrichCutoff = 1)
+```{r plot-heatmap, fig.width = 18, fig.height = 8.5}
+plotHeatmap(method = "Edge_Score1D", result = result, input_data = input_data,
+             penrichCutoff = 0.05, n_pathway = 5, n_mir_heatmap = 10)
 ```
 
-```{r plot-sankey, fig.width = 8, fig.height = 10}
-plotHeatmapSankey(method = "Edge_ORA", result = result, input_data = input_data,
-                     penrichCutoff = 1)
+```{r plot-sankey, fig.width = 18, fig.height = 12}
+plotHeatmapSankey(method = "Edge_Score1D", result = result, input_data = input_data,
+                     penrichCutoff = 0.05, n_pathway = 5, n_mir_heatmap = 10,
+                     n_mir_sankey = 5)
 ```
 
 # Choosing methods for your own data

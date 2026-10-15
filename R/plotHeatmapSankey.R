@@ -549,6 +549,32 @@ plotHeatmapSankey <- function(method, result, input_data, n_mir_heatmap = 20, n_
 # col_gene_fc()
 # max_strength #(for strength)
 
+# stringr::str_wrap() only breaks on whitespace, so underscore-joined names
+# (e.g. MSigDB pathway IDs like "LINDGREN_BLADDER_CANCER_CLUSTER_2B") are
+# treated as a single unbreakable word and never wrap. Break on underscores
+# as well as spaces, inserting a newline in place of the delimiter without
+# otherwise altering the original characters (so real spaces in a label are
+# left as spaces, not turned into underscores).
+wrap_underscored_label <- function(x, width) {
+  vapply(x, function(s) {
+    if (is.na(s)) return(NA_character_)
+    tokens <- regmatches(s, gregexpr("[^_ ]*[_ ]|[^_ ]+$", s))[[1]]
+    lines <- character(0)
+    line <- ""
+    for (tok in tokens) {
+      candidate <- paste0(line, tok)
+      if (nchar(line) > 0 && nchar(sub("[_ ]$", "", candidate)) > width) {
+        lines <- c(lines, sub("[_ ]$", "", line))
+        line <- tok
+      } else {
+        line <- candidate
+      }
+    }
+    lines <- c(lines, sub("[_ ]$", "", line))
+    paste(lines, collapse = "\n")
+  }, character(1), USE.NAMES = FALSE)
+}
+
 plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_max, gene_max, strength_max , penrichCutoff = 0.05, n_mir = 25, n_pathway = 10){
 
   pathway <- pathway %>% filter(pathway %in% all_paths)
@@ -727,12 +753,12 @@ plot_sankey <- function(dict, pathway, enriched_path, all_paths, top_miRNA, mir_
                  aes(x = Demographic, stratum = stratum, y = flow_value, fill = fill_color)) + #
     geom_stratum(data = df_gene_path_long,
                  aes(x = Demographic, stratum = stratum, y = flow_value, fill = fill_color)) + #
-    scale_x_discrete(limits = c("miRNA", "gene", "pathway"), expand = c(0, 0), position = "bottom") +
+    scale_x_discrete(limits = c("miRNA", "gene", "pathway"), expand = c(0.02, 0.15), position = "bottom") +
     geom_text(data = df_mir_gene_long,
               aes(x = Demographic, stratum = stratum, label = after_stat(stratum), y = flow_value), #
-              stat = ggalluvial::StatStratum, size = 3, color = "black") + # stringr::str_wrap(after_stat(stratum), width = length(gene_order)*0.3)
+              stat = ggalluvial::StatStratum, size = 3, color = "black") +
     geom_text(data = subset(df_gene_path_long, Demographic == "pathway"),
-              aes(x = Demographic, stratum = stratum, y = flow_value, label = stringr::str_wrap(after_stat(stratum), width = length(gene_order)*0.3)),
+              aes(x = Demographic, stratum = stratum, y = flow_value, label = wrap_underscored_label(after_stat(stratum), width = 22)),
               stat = ggalluvial::StatStratum, size = 3, color = "black") +
     scale_fill_identity() +
 
