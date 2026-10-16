@@ -33,6 +33,7 @@
 #' @importFrom methods is as
 #' @importFrom utils object.size
 #' @importFrom data.table rbindlist setkey setnames setDT fifelse data.table as.data.table
+#' @importFrom RhpcBLASctl omp_set_num_threads blas_set_num_threads
 ## usethis namespace: end
 NULL
 
