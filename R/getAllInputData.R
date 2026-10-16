@@ -205,15 +205,29 @@ getAllInputData <- function(methods, pathway,
 # will return a list, contains the input of each method
 get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
                      background_MGI, gene_mat = NULL, mir_mat = NULL, scoreFun){
+  scoreFun <- get_data_validate_inputs(methods, gene_DEdata, gene_mat, mir_mat, background_MGI, scoreFun)
+
+  coerced <- get_data_coerce_expr(gene_DEdata, mir_DEdata)
+  gene_DEdata <- coerced$gene_DEdata
+  mir_DEdata <- coerced$mir_DEdata
+  background_MGI <- get_data_coerce_background_mgi(background_MGI)
+
+  result <- get_data_node_based(methods, mir_DEdata, gene_DEdata, background_MGI)
+
+  if (sum(grepl("Edge_", methods)) > 0){
+    result <- c(result, get_data_edge_based(methods, mir_DEdata, gene_DEdata, background_MGI, mir_mat, gene_mat, scoreFun))
+  }
+  result
+}
+
+#' @noRd
+get_data_validate_inputs <- function(methods, gene_DEdata, gene_mat, mir_mat, background_MGI, scoreFun) {
   invalid_method <- base::setdiff(methods, default_method_list)
   if (length(invalid_method) > 0){
     stop("The method(s):", invalid_method, "you are input is(are) not one of the supportive methods. Please revise the method(s)!")
   }
-  sum_TG <- sum(grepl("TG_", methods))
-  sum_MiR <- sum(grepl("MiR_", methods))
   sum_Edge <- sum(grepl("Edge_", methods))
   no_gene_DEdata <- c("TG_ORA", "MiR_ORA", "MiR_Score")
-  DE_method <- c("Edge_ORA", "Edge_Network")
   score_method <- c("Edge_Score1D", "Edge_Score2D", "Edge_Topology")
   if (length(setdiff(methods, no_gene_DEdata)) > 0 && is.null(gene_DEdata)) {
     stop("Please make sure you have input gene_DEdata!")
@@ -233,7 +247,11 @@ get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
          "package vignette for how to build one, or download the full background ",
          "used in the miREA manuscript from its Zenodo deposit.")
   }
+  scoreFun
+}
 
+#' @noRd
+get_data_coerce_expr <- function(gene_DEdata, mir_DEdata) {
   if (!is.null(gene_DEdata)){
     if (ncol(gene_DEdata) != 4 || !is.data.frame(gene_DEdata)){
       stop("Please make sure the input gene_DEdata is a four-column dataframe contains gene, log2FC, stat, and padj!")
@@ -248,106 +266,109 @@ get_data <- function(methods, mir_DEdata, gene_DEdata = NULL,
   colnames(mir_DEdata) <- c("miRNA", "mirLogFC", "mirStat", "mirPadj")
   mir_DEdata <- data.table::as.data.table(mir_DEdata)
 
+  list(gene_DEdata = gene_DEdata, mir_DEdata = mir_DEdata)
+}
 
-  if (!is.null(background_MGI)){
-    if (is.data.frame(background_MGI)){
-      if (ncol(background_MGI) != 2){
-        stop("Please make sure the input background_MGI is a two-column dataframe contains miRNA and gene")
-      }
-      colnames(background_MGI) <- c("miRNA", "gene")
-    } else if (is.character(background_MGI) && is.vector(background_MGI)){
-      background_MGI <- data.frame(
-        miRNA = sub(":.*", "", background_MGI),
-        gene = sub(".*:", "", background_MGI),
-        stringsAsFactors = FALSE
-      )
-    } else {
-      stop("Please make sure the input background_MGI is either a two-column dataframe contains miRNA and gene,
-           or a character vector with each element in the format of [miRNA]:[gene]!")
+#' @noRd
+get_data_coerce_background_mgi <- function(background_MGI) {
+  if (is.data.frame(background_MGI)){
+    if (ncol(background_MGI) != 2){
+      stop("Please make sure the input background_MGI is a two-column dataframe contains miRNA and gene")
     }
     colnames(background_MGI) <- c("miRNA", "gene")
-    background_MGI <- data.table::as.data.table(background_MGI)
+  } else if (is.character(background_MGI) && is.vector(background_MGI)){
+    background_MGI <- data.frame(
+      miRNA = sub(":.*", "", background_MGI),
+      gene = sub(".*:", "", background_MGI),
+      stringsAsFactors = FALSE
+    )
+  } else {
+    stop("Please make sure the input background_MGI is either a two-column dataframe contains miRNA and gene,
+         or a character vector with each element in the format of [miRNA]:[gene]!")
   }
+  colnames(background_MGI) <- c("miRNA", "gene")
+  data.table::as.data.table(background_MGI)
+}
 
+#' @noRd
+get_data_node_based <- function(methods, mir_DEdata, gene_DEdata, background_MGI) {
   result <- list()
-
   if (sum(methods %in% c("TG_ORA", "TG_Score", "MiR_ORA")) > 0){
     interested_miRNAs <- mir_DEdata[abs(mirLogFC) > 1 & mirPadj < 0.05, unique(miRNA)]
   }
 
-
   if ("TG_ORA" %in% methods){
-    data <- background_MGI[miRNA %in% interested_miRNAs, unique(gene)]
-    result[["TG_ORA"]] <- data
+    result[["TG_ORA"]] <- background_MGI[miRNA %in% interested_miRNAs, unique(gene)]
   }
   if ("TG_Score" %in% methods){
     genes <- background_MGI[miRNA %in% interested_miRNAs, unique(gene)]
-    data <- gene_DEdata[gene %in% genes,
-                               setNames(geneStat, gene)]
-    data <- sort(data, decreasing = TRUE)
-    result[["TG_Score"]] <- data
+    data <- gene_DEdata[gene %in% genes, setNames(geneStat, gene)]
+    result[["TG_Score"]] <- sort(data, decreasing = TRUE)
   }
   if ("MiR_ORA" %in% methods){
     result[["MiR_ORA"]] <- interested_miRNAs
   }
   if ("MiR_Score" %in% methods){
     data <- mir_DEdata[, setNames(mirStat, miRNA)]
-    data <- sort(data, decreasing = TRUE)
-    result[["MiR_Score"]] <- data
-
+    result[["MiR_Score"]] <- sort(data, decreasing = TRUE)
   }
-  if (sum(grepl("Edge_", methods)) > 0){
-    dict <- merge(background_MGI, mir_DEdata[, .(miRNA, mirLogFC, mirPadj)], by = "miRNA", all = FALSE)
-    dict <- merge(dict, gene_DEdata[, .(gene, geneLogFC, genePadj)], by = "gene", all = FALSE)
-    cor <- data.table::as.data.table(calc_MGI_corr(dict = dict, mir_mat = mir_mat, gene_mat = gene_mat))
-    dict <- merge(dict, cor, by = c("miRNA", "gene"), all = FALSE)
-    dict <- na.omit(dict)
-    data.table::setcolorder(dict, c("miRNA", "gene", "cor", "corPadj", "mirLogFC", "mirPadj", "geneLogFC", "genePadj"))
-    result[["data"]] <- dict
+  result
+}
 
-    if (any(DE_method %in% methods)){
-      sel <- dict[
-        cor < 0 & corPadj < 0.05 &
-          abs(mirLogFC) > 1 & mirPadj < 0.05 &
-          abs(geneLogFC) > 1 & genePadj < 0.05
-      ]
-      data <- if (nrow(sel) > 0) paste0(sel$miRNA, ":", sel$gene) else character(0)
-      for (sub_method in intersect(DE_method, methods)){
-        result[[sub_method]] <- data
-      }
-    }
-    if (any(score_method %in% methods)){
-      dict[, ratio := (geneLogFC / mirLogFC) * ((1-genePadj)/(1+mirPadj))]
-      if (scoreFun == "rank") {
-        dict[, normratio := ranknorm(ratio)]
-      } else if (scoreFun == "sigmoid") {
-        dict[, normratio := sigmoid(ratio)]
-      } else if (scoreFun == "normalize") {
-        dict[, normratio := max_min(ratio)]
-      } else {
-        dict[, normratio := NA_real_]
-      }
-      dict[, `:=`( # `:=`() form modifies multiple columns; infix `:=` modifies a single column
-        strength = cor * normratio,
-        MGI = paste0(miRNA, ":", gene)
-      )]
-      data.table::setorder(dict, strength)
-      dict <- unique(dict, by = "MGI")
+#' @noRd
+get_data_edge_based <- function(methods, mir_DEdata, gene_DEdata, background_MGI, mir_mat, gene_mat, scoreFun) {
+  DE_method <- c("Edge_ORA", "Edge_Network")
+  score_method <- c("Edge_Score1D", "Edge_Score2D", "Edge_Topology")
+  result <- list()
 
-      if ("Edge_Score1D" %in% methods) {
-        result[["Edge_Score1D"]] <- setNames(as.numeric(dict$strength), dict$MGI)
-      }
+  dict <- merge(background_MGI, mir_DEdata[, .(miRNA, mirLogFC, mirPadj)], by = "miRNA", all = FALSE)
+  dict <- merge(dict, gene_DEdata[, .(gene, geneLogFC, genePadj)], by = "gene", all = FALSE)
+  cor <- data.table::as.data.table(calc_MGI_corr(dict = dict, mir_mat = mir_mat, gene_mat = gene_mat))
+  dict <- merge(dict, cor, by = c("miRNA", "gene"), all = FALSE)
+  dict <- na.omit(dict)
+  data.table::setcolorder(dict, c("miRNA", "gene", "cor", "corPadj", "mirLogFC", "mirPadj", "geneLogFC", "genePadj"))
+  result[["data"]] <- dict
 
-      if ("Edge_Topology" %in% methods) {
-        result[["Edge_Topology"]] <- as.data.frame(dict[, .(MGI, miRNA, gene, strength)])
-      }
-
-      if ("Edge_Score2D" %in% methods) {
-        result[["Edge_Score2D"]] <- as.data.frame(dict[, .(MGI, miRNA, gene, cor, normratio)])
-      }
+  if (any(DE_method %in% methods)){
+    sel <- dict[
+      cor < 0 & corPadj < 0.05 &
+        abs(mirLogFC) > 1 & mirPadj < 0.05 &
+        abs(geneLogFC) > 1 & genePadj < 0.05
+    ]
+    data <- if (nrow(sel) > 0) paste0(sel$miRNA, ":", sel$gene) else character(0)
+    for (sub_method in intersect(DE_method, methods)){
+      result[[sub_method]] <- data
     }
   }
-  return(result)
+  if (any(score_method %in% methods)){
+    dict[, ratio := (geneLogFC / mirLogFC) * ((1-genePadj)/(1+mirPadj))]
+    if (scoreFun == "rank") {
+      dict[, normratio := ranknorm(ratio)]
+    } else if (scoreFun == "sigmoid") {
+      dict[, normratio := sigmoid(ratio)]
+    } else if (scoreFun == "normalize") {
+      dict[, normratio := max_min(ratio)]
+    } else {
+      dict[, normratio := NA_real_]
+    }
+    dict[, `:=`( # `:=`() form modifies multiple columns; infix `:=` modifies a single column
+      strength = cor * normratio,
+      MGI = paste0(miRNA, ":", gene)
+    )]
+    data.table::setorder(dict, strength)
+    dict <- unique(dict, by = "MGI")
+
+    if ("Edge_Score1D" %in% methods) {
+      result[["Edge_Score1D"]] <- setNames(as.numeric(dict$strength), dict$MGI)
+    }
+    if ("Edge_Topology" %in% methods) {
+      result[["Edge_Topology"]] <- as.data.frame(dict[, .(MGI, miRNA, gene, strength)])
+    }
+    if ("Edge_Score2D" %in% methods) {
+      result[["Edge_Score2D"]] <- as.data.frame(dict[, .(MGI, miRNA, gene, cor, normratio)])
+    }
+  }
+  result
 }
 
 

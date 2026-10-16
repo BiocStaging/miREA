@@ -42,6 +42,12 @@
 #'        It accepts either a integer that is universal for all methods, or a list specify the number of cores for each method separately.
 #'        Our recommendation is to specify different nodes for each method. E.g., list(Edge_Score2D = 4, Edge_Topology = 32, Edge_Network = 8).
 #'        If NULL, unparallel computing will be used.
+#' @param seed Optional integer seed for the permutation-based methods
+#'        (Edge_Score2D, Edge_Topology, Edge_Network). If NULL (the default),
+#'        no internal seed is set and the permutation draws depend on the
+#'        caller's current random state. If supplied, it is forwarded to all
+#'        three methods via [withr::with_seed()], which does not alter the
+#'        caller's global random state.
 
 
 
@@ -76,8 +82,40 @@
 #' @export
 miREA <- function(methods, input_data, background = NULL,
                   minSize = NULL, maxSize = NULL, pvalueType = list(TG = "std", MiR = "std", Edge = "neg"),
-                  pAdjMethod = "BH", pvalueCutoff = 1, iter = 1000, ncores = NULL){
+                  pAdjMethod = "BH", pvalueCutoff = 1, iter = 1000, ncores = NULL, seed = NULL){
   if (!is.list(input_data)) stop("input_data must be a list!")
+  methods <- miREA_validate_methods(methods)
+  targets <- unique(vapply(strsplit(methods, "_"), `[`, character(1), 1))
+  miREA_validate_input_data(input_data, methods, targets)
+  background <- miREA_validate_background(background, targets)
+  miREA_validate_pvalueType(pvalueType, targets)
+  ncores <- miREA_validate_ncores(ncores, methods)
+
+  message("Start Enrichment analysis...")
+  message("=== Start time: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " ===")
+  all_result <- list()
+  time <- data.frame(method = character(), time = numeric(), stringsAsFactors = FALSE)
+  n_pathway <- length(unique(input_data$pathway[[1]]$pathway))
+
+  method_calls <- miREA_method_calls(input_data, background, pvalueType, pAdjMethod, pvalueCutoff, minSize, maxSize, iter, ncores, seed)
+  for (m in names(method_calls)) {
+    if (!m %in% methods) next
+    run <- run_miREA_method(m, method_calls[[m]])
+    if (!is.null(run)) {
+      all_result[[m]] <- run$result
+      time <- rbind(time, data.frame(method = m, time = run$elapsed, stringsAsFactors = FALSE))
+    }
+  }
+
+  message("\nmiREA analysis have finished!...")
+  message("=== End time: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " ===")
+
+  miREAResult(result = all_result, time = time, valid_methods = names(all_result),
+              parameter = list(method = methods, n_pathway = n_pathway, minSize = minSize, maxSize = maxSize, pvalueType = pvalueType, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, iter = iter, ncores = ncores, seed = seed))
+}
+
+#' @noRd
+miREA_validate_methods <- function(methods) {
   invalid_methods <- setdiff(methods, default_method_list)
   if (length(invalid_methods) > 0){
     warning("Please check the methods you have input. These methods cannot be specified: ",
@@ -87,8 +125,11 @@ miREA <- function(methods, input_data, background = NULL,
       stop("No valid methods! Please select one or more from default_method_list!")
     }
   }
+  methods
+}
 
-  targets <- unique(vapply(strsplit(methods, "_"), `[`, character(1), 1))
+#' @noRd
+miREA_validate_input_data <- function(input_data, methods, targets) {
   # ensure input_data have all input prepared.
   if (!"data" %in% names(input_data)) {
     stop("input_data is missing the 'data' component.")
@@ -98,7 +139,6 @@ miREA <- function(methods, input_data, background = NULL,
     stop("The following methods are missing in input_data$data: ",
          paste(missing_data, collapse = ", "))
   }
-
 
   if (!"pathway" %in% names(input_data)) {
     stop("input_data is missing the 'pathway' component.")
@@ -126,8 +166,11 @@ miREA <- function(methods, input_data, background = NULL,
       stop("You have used network method but didn't specified MGI in input_data!")
     }
   }
+  invisible(NULL)
+}
 
-  # check background
+#' @noRd
+miREA_validate_background <- function(background, targets) {
   if (!is.null(background)){
     if (!is.list(background)){
       if (length(targets) > 1){
@@ -145,15 +188,21 @@ miREA <- function(methods, input_data, background = NULL,
          "getAllMiRNAs() for MiR_ methods), or download the full background used in ",
          "the miREA manuscript from its Zenodo deposit.")
   }
+  background
+}
 
-  # check pvalueType
+#' @noRd
+miREA_validate_pvalueType <- function(pvalueType, targets) {
   missing_pvalueType <- targets[!targets %in% names(pvalueType)]
   if (length(missing_pvalueType) > 0){
     stop("The following method targets are missing in pvalueType: ",
          paste(missing_pvalueType, collapse = ", "))
   }
+  invisible(NULL)
+}
 
-  # check ncores
+#' @noRd
+miREA_validate_ncores <- function(ncores, methods) {
   methods_ncores <- c("Edge_Score2D", "Edge_Topology", "Edge_Network")
   methods_ncores <- intersect(methods_ncores, methods)
   if (!is.null(ncores) && is.list(ncores)){
@@ -171,7 +220,7 @@ miREA <- function(methods, input_data, background = NULL,
       }
     }
   } else if (is.integer(ncores) || is.numeric(ncores)){
-    if (length(ncores) != 1 || 
+    if (length(ncores) != 1 ||
         is.na(ncores) ||
         !is.finite(ncores) ||
         ncores < 1 ||
@@ -184,138 +233,48 @@ miREA <- function(methods, input_data, background = NULL,
     warning("You didn't specify number of cores [ncores]. Use unparallel computing instead.\n")
     ncores <- setNames(as.list(rep(1L, length(methods_ncores))), methods_ncores)
   }
+  ncores
+}
 
-
-  message("Start Enrichment analysis...")
-  message("=== Start time: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " ===")
-  all_result <- list()
-  time <- data.frame(method = character(), time = numeric(), stringsAsFactors = FALSE)
-  n_pathway <- length(unique(input_data$pathway[[1]]$pathway))
-  tryCatch({
-    if ("TG_ORA" %in% methods){
-      time_TG_ORA <- system.time({
-        result_TG_ORA <- TG_ORA(TG = input_data$data$TG_ORA, background = background$TG, pathway = input_data$pathway$TG,
-                                pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      all_result[["TG_ORA"]] <- result_TG_ORA
-      time <- rbind(time, data.frame(method = "TG_ORA", time = time_TG_ORA[["elapsed"]], stringsAsFactors = FALSE))
-      message("    - TG_ORA finished, time cost: ", time_TG_ORA[["elapsed"]], " s. ")
-    }}, error = function(e) {
-      warning("TG_ORA failed: ", e$message)
-    })
-  tryCatch({
-    if ("TG_Score" %in% methods){
-      time_TG_Score <- system.time({
-        result_TG_Score <- TG_Score(
-          geneList = input_data$data$TG_Score, pathway = input_data$pathway$TG, pvalueType = pvalueType$TG,
-          pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      all_result[["TG_Score"]] <- result_TG_Score
-      time <- rbind(time, data.frame(method = "TG_Score", time = time_TG_Score[["elapsed"]], stringsAsFactors = FALSE))
-      message("    - TG_Score finished, time cost: ", time_TG_Score[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("TG_Score failed: ", e$message)
-  })
-  tryCatch({
-    if ("MiR_ORA" %in% methods){
-      time_MiR_ORA <- system.time({
-        result_MiR_ORA <- MiR_ORA(DEmiR = input_data$data$MiR_ORA, background = background$MiR, pathway = input_data$pathway$MiR,
-                                  pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      time <- rbind(time, data.frame(method = "MiR_ORA", time = time_MiR_ORA[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["MiR_ORA"]] <- result_MiR_ORA
-      message("    - MiR_ORA finished, time cost: ", time_MiR_ORA[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("MiR_ORA failed: ", e$message)
-  })
-  tryCatch({
-    if ("MiR_Score" %in% methods){
-      time_MiR_Score <- system.time({
-        result_MiR_Score <- MiR_Score(miRList = input_data$data$MiR_Score, pathway = input_data$pathway$MiR, pvalueType = pvalueType$MiR,
-                                      pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      time <- rbind(time, data.frame(method = "MiR_Score", time = time_MiR_Score[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["MiR_Score"]] <- result_MiR_Score
-      message("    - MiR_Score finished, time cost: ", time_MiR_Score[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("MiR_Score failed: ", e$message)
-  })
-  tryCatch({
-    if ("Edge_ORA" %in% methods){
-      time_Edge_ORA <- system.time({
-        result_Edge_ORA <- Edge_ORA(DEMGI = input_data$data$Edge_ORA, background = background$Edge, pathway = input_data$pathway$Edge,
-                                    pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      time <- rbind(time, data.frame(method = "Edge_ORA", time = time_Edge_ORA[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["Edge_ORA"]] <- result_Edge_ORA
-      message("    - Edge_ORA finished, time cost: ", time_Edge_ORA[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("Edge_ORA failed: ", e$message)
-  })
-  tryCatch({
-    if ("Edge_Score1D" %in% methods){
-      time_Edge_Score1D <- system.time({
-        result_Edge_Score1D <- Edge_Score1D(MGIList = input_data$data$Edge_Score1D, pathway = input_data$pathway$Edge, pvalueType = pvalueType$Edge,
-                                        pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      time <- rbind(time, data.frame(method = "Edge_Score1D", time = time_Edge_Score1D[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["Edge_Score1D"]] <- result_Edge_Score1D
-      message("    - Edge_Score1D finished, time cost: ", time_Edge_Score1D[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("Edge_Score1D failed: ", e$message)
-  })
-  tryCatch({
-    if ("Edge_Score2D" %in% methods){
-      time_Edge_Score2D <- system.time({
-        result_Edge_Score2D <- Edge_Score2D(MGI2D = input_data$data$Edge_Score2D, pathway = input_data$pathway$Edge, background = background$Edge,
-                                          iter = iter, ncores = ncores$Edge_Score2D, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      time <- rbind(time, data.frame(method = "Edge_Score2D", time = time_Edge_Score2D[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["Edge_Score2D"]] <- result_Edge_Score2D
-      message("    - Edge_Score2D finished, time cost: ", time_Edge_Score2D[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("Edge_Score2D failed: ", e$message)
-  })
-  tryCatch({
-    if ("Edge_Topology" %in% methods){
-      time_Edge_Topology <- system.time({
-        result_Edge_Topology <- Edge_Topology(MGI = input_data$data$Edge_Topology, background = background$Edge, pathway = input_data$pathway$Edge,
+#' @noRd
+miREA_method_calls <- function(input_data, background, pvalueType, pAdjMethod, pvalueCutoff, minSize, maxSize, iter, ncores, seed) {
+  list(
+    TG_ORA = function() TG_ORA(TG = input_data$data$TG_ORA, background = background$TG, pathway = input_data$pathway$TG,
+                                pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize),
+    TG_Score = function() TG_Score(
+      geneList = input_data$data$TG_Score, pathway = input_data$pathway$TG, pvalueType = pvalueType$TG,
+      pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize),
+    MiR_ORA = function() MiR_ORA(DEmiR = input_data$data$MiR_ORA, background = background$MiR, pathway = input_data$pathway$MiR,
+                                  pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize),
+    MiR_Score = function() MiR_Score(miRList = input_data$data$MiR_Score, pathway = input_data$pathway$MiR, pvalueType = pvalueType$MiR,
+                                      pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize),
+    Edge_ORA = function() Edge_ORA(DEMGI = input_data$data$Edge_ORA, background = background$Edge, pathway = input_data$pathway$Edge,
+                                    pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize),
+    Edge_Score1D = function() Edge_Score1D(MGIList = input_data$data$Edge_Score1D, pathway = input_data$pathway$Edge, pvalueType = pvalueType$Edge,
+                                            pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize),
+    Edge_Score2D = function() Edge_Score2D(MGI2D = input_data$data$Edge_Score2D, pathway = input_data$pathway$Edge, background = background$Edge,
+                                            iter = iter, ncores = ncores$Edge_Score2D, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize, seed = seed),
+    Edge_Topology = function() Edge_Topology(MGI = input_data$data$Edge_Topology, background = background$Edge, pathway = input_data$pathway$Edge,
                                               pathway_GGI = input_data$pathway_GGI, dict_MGI = input_data$dict_MGI, ncores = ncores$Edge_Topology, pvalueType = pvalueType$Edge,
-                                              iter = iter, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize)
-      })
-      time <- rbind(time, data.frame(method = "Edge_Topology", time = time_Edge_Topology[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["Edge_Topology"]] <- result_Edge_Topology
-      message("    - Edge_Topology finished, time cost: ", time_Edge_Topology[["elapsed"]], " s. ")
-    }
-  }, error = function(e) {
-    warning("Edge_Topology failed: ", e$message)
-  })
-  tryCatch({
-    if ("Edge_Network" %in% methods){
-      time_Edge_Network <- system.time({
-        result_Edge_Network <- Edge_Network(DEMGI = input_data$data$Edge_Network,
+                                              iter = iter, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize, seed = seed),
+    Edge_Network = function() Edge_Network(DEMGI = input_data$data$Edge_Network,
                                             pathway_gene = input_data$pathway$TG, pathway_MGI = input_data$pathway$Edge,
                                             pathway_GGI = input_data$pathway_GGI,
                                             MGI = input_data$MGI, GGI = input_data$GGI, ncores = ncores$Edge_Network,
-                                            pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize, iter = iter)
-      })
-      time <- rbind(time, data.frame(method = "Edge_Network", time = time_Edge_Network[["elapsed"]], stringsAsFactors = FALSE))
-      all_result[["Edge_Network"]] <- result_Edge_Network
-      message("    - Edge_Network finished, time cost: ", time_Edge_Network[["elapsed"]], " s. ")
-    }
+                                            pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, minSize = minSize, maxSize = maxSize, iter = iter, seed = seed)
+  )
+}
+
+#' @noRd
+run_miREA_method <- function(name, call_fn) {
+  tryCatch({
+    elapsed <- system.time({
+      result <- call_fn()
+    })[["elapsed"]]
+    message("    - ", name, " finished, time cost: ", elapsed, " s. ")
+    list(result = result, elapsed = elapsed)
   }, error = function(e) {
-    warning("Edge_Network failed: ", e$message)
+    warning(name, " failed: ", e$message)
+    NULL
   })
-
-  message("\nmiREA analysis have finished!...")
-  message("=== End time: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " ===")
-
-  miREAResult(result = all_result, time = time, valid_methods = names(all_result),
-              parameter = list(method = methods, n_pathway = n_pathway, minSize = minSize, maxSize = maxSize, pvalueType = pvalueType, pAdjMethod = pAdjMethod, pvalueCutoff = pvalueCutoff, iter = iter, ncores = ncores))
 }
