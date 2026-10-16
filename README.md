@@ -82,8 +82,6 @@ types and pathway sets used in the miREA manuscript have been deposited at
 
 ## Citation
 
-If you find our work useful, please consider citing it:
-
 Zhesi Zhang, Xin Lai. A network-based tool for microRNA-oriented enrichment
 analysis. Submitted (2026).
 
