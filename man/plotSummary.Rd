@@ -14,7 +14,7 @@ plotSummary(
 )
 }
 \arguments{
-\item{result}{the output of miREA() function. Just use the unprocessed result list as the input here.}
+\item{result}{the output of miREA() function, used here as the unprocessed result list.}
 
 \item{penrichCutoff}{The threshold for deciding enrichment of pathways. Default is 0.05.}
 

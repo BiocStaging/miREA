@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.git$
+^\.github$
 ^\.gitignore$
 ^data-raw$
 ^README\.Rmd$

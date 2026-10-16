@@ -13,7 +13,8 @@ Edge_Score2D(
   minSize = NULL,
   maxSize = NULL,
   iter = 1000,
-  ncores = NULL
+  ncores = NULL,
+  seed = NULL
 )
 }
 \arguments{
@@ -26,7 +27,7 @@ Edge_Score2D(
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-If you don't want any adjustment, please set pAdjMethod = "none".}
+If no adjustment is desired, set pAdjMethod = "none".}
 
 \item{pvalueCutoff}{The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.}
 
@@ -37,6 +38,12 @@ If you don't want any adjustment, please set pAdjMethod = "none".}
 \item{iter}{Number of iterations for permutation test}
 
 \item{ncores}{Number of cores for calculating randomized r during the permutation test.}
+
+\item{seed}{Optional integer seed for the permutation test. If NULL (the
+default), no internal seed is set and the permutation draws depend
+on the caller's current random state. If supplied, the permutation
+is made reproducible via [withr::with_seed()], which does not alter
+the caller's global random state.}
 }
 \value{
 a dataframe contains enrichment result for Edge-Score2D

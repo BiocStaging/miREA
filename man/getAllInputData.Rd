@@ -30,7 +30,7 @@ getAllInputData(
 
 \item{background_GGI}{optional, it should be a two-column data frame that contains source gene and target gene. Combined with *GGI_source*. If NULL, we would use GGI_source to determine the background GGIs.}
 
-\item{GGI_source}{optional, select from "Omnipath" or "Reactome".if you don't have specified background_GGI and neither GGI_source. The default Omnipath will be used.}
+\item{GGI_source}{optional, select from "Omnipath" or "Reactome". Used when background_GGI is not provided. The default is Omnipath.}
 
 \item{gene_mat}{optional, needed for Edge_ method, used for calculating correlations between miRNAs and genes. It should be a raw gene expression matrix (each row a gene, each column a sample), either as a dataframe/matrix or as a SummarizedExperiment object.}
 

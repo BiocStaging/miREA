@@ -22,9 +22,9 @@ plotHeatmap(
 \arguments{
 \item{method}{a character that specifies only one method which you have the corresponding enrichment result (only five edge-based methods are supported).}
 
-\item{result}{the output of miREA() function. Just use the unprocessed result list as the input here.}
+\item{result}{the output of miREA() function, used here as the unprocessed result list.}
 
-\item{input_data}{the output of getAllInputData() function. Just use the unprocessed input_data list as the input here.}
+\item{input_data}{the output of getAllInputData() function, used here as the unprocessed input_data list.}
 
 \item{n_mir_heatmap}{The number of miRNAs included in the heatmap. Default is 10.}
 

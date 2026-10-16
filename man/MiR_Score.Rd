@@ -19,7 +19,7 @@ MiR_Score(
 
 \item{pathway}{A two-column dataframe contains pathway and their member miRNAs.}
 
-\item{pvalueType}{ow to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
+\item{pvalueType}{How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 The "pos" and "neg" score types are intended to be used for one-tailed tests
 (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
 The "std" is used when interested in both positive and negative scores.}
@@ -27,7 +27,7 @@ The "std" is used when interested in both positive and negative scores.}
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-If you don't want any adjustment, please set pAdjMethod = "none".}
+If no adjustment is desired, set pAdjMethod = "none".}
 
 \item{pvalueCutoff}{The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.}
 

@@ -14,13 +14,14 @@ miREA(
   pAdjMethod = "BH",
   pvalueCutoff = 1,
   iter = 1000,
-  ncores = NULL
+  ncores = NULL,
+  seed = NULL
 )
 }
 \arguments{
 \item{methods}{Method used for enrichment analysis, see default_method_list for all supportive options. Methods could be several, like c("Edge_ORA", "Edge_Score1D").}
 
-\item{input_data}{Input data list. Contains all kind of input data for all methods, including data, pathway, pathway_GGI, GGI, dict_MGI. 
+\item{input_data}{Input data list, containing the input data for all methods, including data, pathway, pathway_GGI, GGI, and dict_MGI.
 Use getAllInputData() function to generate. You could also generate it by yourself.
   input_data$data: each sub-element is named by the method, containing the input data format.
     TG_ORA: DEG, MiR_ORA: DEmiR, Edge_ORA: DEMGI, Edge_Network: DEMGI
@@ -49,13 +50,13 @@ If NULL, use the global background instead.}
 \item{pvalueType}{How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is list(TG = "std", MiR = "std", Edge = "neg").
 The "pos" and "neg" score types are intended to be used for one-tailed tests
 (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
-The "std" is used when interseted both positive and negative scores, which is the same with the original GSEA algorithm.
+The "std" is used when interested in both positive and negative scores, which is the same as the original GSEA algorithm.
 Only used in Score-based method (Edge_Score2D, Edge_TopoScore, TG_Score, MiR_Score).}
 
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-If you don't want any adjustment, please set pAdjMethod = "none".}
+If no adjustment is desired, set pAdjMethod = "none".}
 
 \item{pvalueCutoff}{The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 1.}
 
@@ -65,6 +66,13 @@ If you don't want any adjustment, please set pAdjMethod = "none".}
 It accepts either a integer that is universal for all methods, or a list specify the number of cores for each method separately.
 Our recommendation is to specify different nodes for each method. E.g., list(Edge_Score2D = 4, Edge_Topology = 32, Edge_Network = 8).
 If NULL, unparallel computing will be used.}
+
+\item{seed}{Optional integer seed for the permutation-based methods
+(Edge_Score2D, Edge_Topology, Edge_Network). If NULL (the default),
+no internal seed is set and the permutation draws depend on the
+caller's current random state. If supplied, it is forwarded to all
+three methods via [withr::with_seed()], which does not alter the
+caller's global random state.}
 }
 \value{
 A [miREAResult-class] object containing the per-method result tables

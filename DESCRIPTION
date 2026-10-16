@@ -50,7 +50,6 @@ Imports:
     RhpcBLASctl,
     scales,
     stats,
-    stringr,
     tibble,
     utils,
     withr

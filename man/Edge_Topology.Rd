@@ -16,7 +16,8 @@ Edge_Topology(
   pvalueCutoff = 0.05,
   minSize = NULL,
   maxSize = NULL,
-  ncores = NULL
+  ncores = NULL,
+  seed = NULL
 )
 }
 \arguments{
@@ -25,7 +26,7 @@ Edge_Topology(
 \item{pvalueType}{How to calculate p value. See default_pvalueType for all possible options. Default pvalueType is "pos".
 The "pos" and "neg" score types are intended to be used for one-tailed tests
 (i.e. when one is interested only in positive ("pos") or negative ("neg") enrichment).
-The "std" is used when interseted both positive and negative scores.}
+The "std" is used when interested in both positive and negative scores.}
 
 \item{background}{A character vector contains background MGI in the format of [miRNA]:[gene].}
 
@@ -47,6 +48,12 @@ Use default_pAdjMethod to find all possible values.}
 \item{maxSize}{The maximum MGI set sizes allowed for analysis, filtering out pathways with number of member MGIs more than the maxSize threshold.}
 
 \item{ncores}{Number of cores for permutation test (parallel computing different pathways).}
+
+\item{seed}{Optional integer seed for the permutation test. If NULL (the
+default), no internal seed is set and the permutation draws depend
+on the caller's current random state. If supplied, the permutation
+is made reproducible via [withr::with_seed()], which does not alter
+the caller's global random state.}
 }
 \value{
 A dataframe containing the enrichment result for Edge-Topology.

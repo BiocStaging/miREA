@@ -24,5 +24,10 @@ Authors:
   \item Xin Lai (\href{https://orcid.org/0000-0003-4913-5822}{ORCID})
 }
 
+Other contributors:
+\itemize{
+  \item Tampere University (PROFI6 Health Data Science program) [funder]
+}
+
 }
 \keyword{internal}

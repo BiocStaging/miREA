@@ -184,6 +184,7 @@ Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueTy
   message(paste("      Total MGI size of each core is:", paste(task_sizes, collapse = " ")))
   cl <- parallel::makeCluster(ncores) # , type = "SOCK", outfile = NULL
   on.exit(parallel::stopCluster(cl), add = TRUE)
+  requireNamespace("RhpcBLASctl")
 
   parallel::clusterExport(cl, c("MGI", "dict_MGI", "pathway", "pathway_GGI", "pvalueType", # "background",
                                 "iter", "ncores", "task_list", "Edge_Topology_simple", "Edge_Topology_single", "min_max", "seed"), envir = environment())

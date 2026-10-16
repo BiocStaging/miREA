@@ -24,7 +24,7 @@ TG_ORA(
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-If you don't want any adjustment, please set pAdjMethod = "none".}
+If no adjustment is desired, set pAdjMethod = "none".}
 
 \item{pvalueCutoff}{The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.}
 
@@ -33,7 +33,7 @@ If you don't want any adjustment, please set pAdjMethod = "none".}
 \item{maxSize}{The maximum gene set sizes allowed for analysis, filtering out pathways with number of member genes more than the maxSize threshold.}
 }
 \value{
-A dataframe containing the enrichment result for TG-Score.
+A dataframe containing the enrichment result for TG-ORA.
 }
 \description{
 Perform target gene enrichment analysis based on the overlap between differentially expressed gene set and pathway gene set.

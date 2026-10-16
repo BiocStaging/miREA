@@ -16,7 +16,8 @@ Edge_Network(
   minSize = NULL,
   maxSize = NULL,
   iter = 1000,
-  ncores = NULL
+  ncores = NULL,
+  seed = NULL
 )
 }
 \arguments{
@@ -35,7 +36,7 @@ Edge_Network(
 \item{pAdjMethod}{The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 Use default_pAdjMethod to find all possible values.
 If not specified, Benjamini & Hochberg (BH) method will be automatically used.
-If you don't want any adjustment, please set pAdjMethod = "none".}
+If no adjustment is desired, set pAdjMethod = "none".}
 
 \item{pvalueCutoff}{The threshold for statistical significance, filtering out pathways with padj values below the specified pvalueCutoff. Default pvalueCutoff is 0.05.}
 
@@ -46,14 +47,20 @@ If you don't want any adjustment, please set pAdjMethod = "none".}
 \item{iter}{Number of iterations for permutation test}
 
 \item{ncores}{Number of cores for permutation test (parallel computing random RWR procedure).}
+
+\item{seed}{Optional integer seed for the permutation test. If NULL (the
+default), no internal seed is set and the permutation draws depend
+on the caller's current random state. If supplied, the permutation
+is made reproducible via [withr::with_seed()], which does not alter
+the caller's global random state.}
 }
 \value{
 A dataframe containing the enrichment result for Edge-Network.
 }
 \description{
-Perform MGI network enrichment analysis, based on Random Walk with Restart
-(RWR), by evaluating how relevant the differentially expressed MGI set is
-to the pathway MGI set.
+Perform miRNA-gene interaction (MGI) network enrichment analysis, based on
+Random Walk with Restart (RWR), by evaluating how relevant the
+differentially expressed MGI set is to the pathway MGI set.
 }
 \examples{
 data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata)
