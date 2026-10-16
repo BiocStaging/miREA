@@ -19,6 +19,11 @@
 #' @param maxSize The maximum MGI set sizes allowed for analysis, filtering out pathways with number of member MGIs more than the maxSize threshold.
 #' @param iter Number of iterations for permutation test
 #' @param ncores Number of cores for permutation test (parallel computing random RWR procedure).
+#' @param seed Optional integer seed for the permutation test. If NULL (the
+#'        default), no internal seed is set and the permutation draws depend
+#'        on the caller's current random state. If supplied, the permutation
+#'        is made reproducible via [withr::with_seed()], which does not alter
+#'        the caller's global random state.
 #' @return A dataframe containing the enrichment result for Edge-Network.
 #' @examples
 #' data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata)
@@ -46,7 +51,7 @@ Edge_Network <- function(DEMGI,
                          MGI, GGI,
                          pAdjMethod = "BH", pvalueCutoff = 0.05,
                          minSize = NULL, maxSize = NULL,
-                         iter = 1000, ncores = NULL){
+                         iter = 1000, ncores = NULL, seed = NULL){
   message("\n  Start Edge-Network analysis ...")
   restore_rng <- snapshot_rng_state()
   on.exit(restore_rng(), add = TRUE)
@@ -146,20 +151,24 @@ Edge_Network <- function(DEMGI,
   MGI_pw_indices <- which(all_edges$type == "MGI" & edge_ids %in% pathway$MGI) # all MGIs that in the randomization range
   MGI_connect_indices <- setdiff(which(all_edges$type == "MGI"), c(MGI_out_indices, MGI_pw_indices))
 
-  set.seed(12345)
-  seeds_null <- sample(10000, iter, replace = FALSE)
+  seeds_null <- if (is.null(seed)) {
+    sample(10000, iter, replace = FALSE)
+  } else {
+    withr::with_seed(seed, sample(10000, iter, replace = FALSE))
+  }
 
   restart_matrix <- cbind(
     restart_list,
     vapply(seq_len(iter), function(i){
-      set.seed(seeds_null[i])
-      new_restart <- rep(0, length(edge_ids))
-      new_restart[MGI_out_indices] <-1 # fixed DEMGI that outside the pathways as 1
-      selected_pw_indices <- sample(MGI_pw_indices, num_DE_in, replace = FALSE)
-      selected_connect_indices <- sample(MGI_connect_indices, num_DE_connect, replace = FALSE)
-      selected_indices <- c(selected_pw_indices,selected_connect_indices)
-      new_restart[selected_indices] <- 1
-      return(new_restart)
+      withr::with_seed(seeds_null[i], {
+        new_restart <- rep(0, length(edge_ids))
+        new_restart[MGI_out_indices] <-1 # fixed DEMGI that outside the pathways as 1
+        selected_pw_indices <- sample(MGI_pw_indices, num_DE_in, replace = FALSE)
+        selected_connect_indices <- sample(MGI_connect_indices, num_DE_connect, replace = FALSE)
+        selected_indices <- c(selected_pw_indices,selected_connect_indices)
+        new_restart[selected_indices] <- 1
+        new_restart
+      })
     }, numeric(length(edge_ids)))
   )
   colnames(restart_matrix) <- c('OBS', paste0("P", seq(iter)))

@@ -21,6 +21,11 @@
 #' @param pAdjMethod The method used for multiple testing correction to adjust p-values and control the false discovery rate.
 #'        Use default_pAdjMethod to find all possible values.
 #' @param ncores Number of cores for permutation test (parallel computing different pathways).
+#' @param seed Optional integer seed for the permutation test. If NULL (the
+#'        default), no internal seed is set and the permutation draws depend
+#'        on the caller's current random state. If supplied, the permutation
+#'        is made reproducible via [withr::with_seed()], which does not alter
+#'        the caller's global random state.
 #' @return A dataframe containing the enrichment result for Edge-Topology.
 #' @examples
 #' data(toy_pathway); data(toy_mir_DEdata); data(toy_gene_DEdata)
@@ -44,7 +49,7 @@
 Edge_Topology <- function(MGI, pvalueType = "neg",
                            background, pathway, pathway_GGI, dict_MGI,
                            iter = 1000, pAdjMethod = "BH", pvalueCutoff = 0.05,
-                           minSize = NULL, maxSize = NULL, ncores = NULL){
+                           minSize = NULL, maxSize = NULL, ncores = NULL, seed = NULL){
   message("\n  Start Edge-Topology analysis ...")
   restore_rng <- snapshot_rng_state()
   on.exit(restore_rng(), add = TRUE)
@@ -115,9 +120,9 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
   }
   message("    Calculate pathway scores and siginificant level on ", ncores, " cores...")
   if (ncores == 1){
-    result <- Edge_Topology_simple(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter) # background = background,
+    result <- Edge_Topology_simple(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter, seed = seed) # background = background,
   } else {
-    result <- Edge_Topology_parallel(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter, ncores = ncores) # background = background,
+    result <- Edge_Topology_parallel(MGI = MGI, dict_MGI = dict_MGI, pathway = pathway, pathway_GGI = pathway_GGI, pvalueType = pvalueType, iter = iter, ncores = ncores, seed = seed) # background = background,
   }
   result <- result %>%
     dplyr::mutate(padj = stats::p.adjust(p_value, method = pAdjMethod)) %>%
@@ -133,7 +138,7 @@ Edge_Topology <- function(MGI, pvalueType = "neg",
 }
 
 
-Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType, iter){ # background,
+Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType, iter, seed = NULL){ # background,
 
 
   pathway_list <- split(pathway, pathway$pathway)
@@ -146,7 +151,7 @@ Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType
     pw_single <- pathway_list[[name]]
     pw_GGI_single <- pathway_GGI_list[[name]]
 
-    result <- Edge_Topology_single(MGI = MGI, PW = pw_single, PW_GGI = pw_GGI_single, dict_MGI = dict_MGI, pvalueType = pvalueType, iter = iter) # background = background,
+    result <- Edge_Topology_single(MGI = MGI, PW = pw_single, PW_GGI = pw_GGI_single, dict_MGI = dict_MGI, pvalueType = pvalueType, iter = iter, seed = seed) # background = background,
 
     message("      ", i, " / ", n_pathway, " , ", name, " : ", round(result$p_value, 4))
 
@@ -157,7 +162,7 @@ Edge_Topology_simple <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType
 }
 
 ## Edge_Topology_parallel
-Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType, iter, ncores){ # background,
+Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueType, iter, ncores, seed = NULL){ # background,
   pathway_counts <- table(pathway$pathway)
   pathway_counts <- sort(pathway_counts, decreasing = TRUE, na.last = NA)
   pathway_names_sorted <- names(pathway_counts)
@@ -181,20 +186,19 @@ Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueTy
   on.exit(parallel::stopCluster(cl), add = TRUE)
 
   parallel::clusterExport(cl, c("MGI", "dict_MGI", "pathway", "pathway_GGI", "pvalueType", # "background",
-                                "iter", "ncores", "task_list", "Edge_Topology_simple", "Edge_Topology_single", "min_max"), envir = environment())
+                                "iter", "ncores", "task_list", "Edge_Topology_simple", "Edge_Topology_single", "min_max", "seed"), envir = environment())
   parallel::clusterEvalQ(cl, {
-    Sys.setenv(
-      OMP_NUM_THREADS = 1,
-      OPENBLAS_NUM_THREADS = 1,
-      MKL_NUM_THREADS = 1,
-      GOTO_NUM_THREADS = 1,
-      OMP_DISPLAY_ENV = "FALSE",
-      KMP_SETTINGS = "FALSE"
-    )
+    # Keep each worker single-threaded for BLAS/OpenMP so that ncores worker
+    # processes don't each spawn their own thread pool and oversubscribe the
+    # machine (igraph's centrality routines and data.table both parallelize
+    # internally by default).
+    RhpcBLASctl::omp_set_num_threads(1)
+    RhpcBLASctl::blas_set_num_threads(1)
 
     requireNamespace("igraph")
     requireNamespace("data.table")
     requireNamespace("dplyr")
+    requireNamespace("withr")
 
     NULL
   })
@@ -205,7 +209,7 @@ Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueTy
     Edge_Topology_simple(MGI = MGI, dict_MGI = dict_MGI,
                           pathway = pw, pathway_GGI = ggi, # background,
                           pvalueType = pvalueType,
-                          iter = iter)
+                          iter = iter, seed = seed)
   })
 
   pathway_result <- combine_parallel(results)
@@ -214,7 +218,7 @@ Edge_Topology_parallel <- function(MGI, dict_MGI, pathway, pathway_GGI, pvalueTy
 
 
 
-Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter){
+Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter, seed = NULL){
   if (is.null(PW_GGI)){
     PW_GGI <- data.table(pathway = character(), from = character(), to = character(), stringsAsFactors = FALSE)
   }
@@ -271,30 +275,34 @@ Edge_Topology_single <- function(MGI, PW, PW_GGI, dict_MGI, pvalueType, iter){
   basic_net <- igraph::graph_from_data_frame(PW_GGI[, .(from, to)], directed = TRUE, vertices = all_vertices)
 
   compute_random_score <- function(i){
-    set.seed(seeds_null[i])
-    g_rand <- igraph::rewire(g_MGI, with = keeping_degseq(niter = ecount(g_MGI) * 50))
-    g_combined <- igraph::union(g_rand, basic_net)
+    withr::with_seed(seeds_null[i], {
+      g_rand <- igraph::rewire(g_MGI, with = keeping_degseq(niter = ecount(g_MGI) * 50))
+      g_combined <- igraph::union(g_rand, basic_net)
 
-    rand_edge_eb <- igraph::edge_betweenness(g_combined)
+      rand_edge_eb <- igraph::edge_betweenness(g_combined)
 
-    rand_MGI <- data.table(igraph::as_data_frame(g_rand, what = "edges"))
-    rand_edge_dt <- data.table(igraph::as_data_frame(g_combined, what = "edges"))[, EB := rand_edge_eb]
-    rand_edge_dt[, EB := fifelse(is.na(EB), 0, EB)]
-    rand_edge_dt[, centrality := min_max(EB)+0.01]
-    rand_PW_dt <- merge(rand_MGI, rand_edge_dt, by = c("from", "to"), all.x = TRUE)
-    rand_PW_dt[, MGI := paste0(from, ":", to)]
-    rand_PW_dt[, strength := dict_MGI[MGI]]
-    rand_PW_dt[is.na(strength), strength := 0]
-    rand_PW_dt[, score := centrality * strength]
-    rand_PW_dt <- unique(rand_PW_dt)
-    sum(rand_PW_dt$score, na.rm = TRUE)
+      rand_MGI <- data.table(igraph::as_data_frame(g_rand, what = "edges"))
+      rand_edge_dt <- data.table(igraph::as_data_frame(g_combined, what = "edges"))[, EB := rand_edge_eb]
+      rand_edge_dt[, EB := fifelse(is.na(EB), 0, EB)]
+      rand_edge_dt[, centrality := min_max(EB)+0.01]
+      rand_PW_dt <- merge(rand_MGI, rand_edge_dt, by = c("from", "to"), all.x = TRUE)
+      rand_PW_dt[, MGI := paste0(from, ":", to)]
+      rand_PW_dt[, strength := dict_MGI[MGI]]
+      rand_PW_dt[is.na(strength), strength := 0]
+      rand_PW_dt[, score := centrality * strength]
+      rand_PW_dt <- unique(rand_PW_dt)
+      sum(rand_PW_dt$score, na.rm = TRUE)
+    })
   }
 
   # === Stepwise Permutation Process === #
   iter1 <- min(iter, max(10, ceiling(0.1 * iter)))
   iter2 <- min(iter, max(50, ceiling(0.5 * iter)))
-  set.seed(12345)
-  seeds_null <- sample(10000, iter, replace = FALSE)
+  seeds_null <- if (is.null(seed)) {
+    sample(10000, iter, replace = FALSE)
+  } else {
+    withr::with_seed(seed, sample(10000, iter, replace = FALSE))
+  }
 
   s_random1 <- vapply(seq_len(iter1), compute_random_score, numeric(1))
   # n_extreme1 <- sum(s_random1 >= PW_score)

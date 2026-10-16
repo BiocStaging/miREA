@@ -16,6 +16,11 @@
 #' @param maxSize The maximum MGI set sizes allowed for analysis, filtering out pathways with number of member MGIs more than the maxSize threshold.
 #' @param iter Number of iterations for permutation test
 #' @param ncores Number of cores for calculating randomized r during the permutation test.
+#' @param seed Optional integer seed for the permutation test. If NULL (the
+#'        default), no internal seed is set and the permutation draws depend
+#'        on the caller's current random state. If supplied, the permutation
+#'        is made reproducible via [withr::with_seed()], which does not alter
+#'        the caller's global random state.
 #'
 #' @return a dataframe contains enrichment result for Edge-Score2D
 #' @examples
@@ -33,7 +38,7 @@
 #' )
 #' head(res)
 #' @export
-Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", pvalueCutoff = 0.05, minSize = NULL, maxSize = NULL, iter = 1000, ncores = NULL){
+Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", pvalueCutoff = 0.05, minSize = NULL, maxSize = NULL, iter = 1000, ncores = NULL, seed = NULL){
   message("\n  Start Edge_Score2D analysis ...")
   restore_rng <- snapshot_rng_state()
   on.exit(restore_rng(), add = TRUE)
@@ -106,12 +111,14 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
   pathway_sizes <- table(pathway$pathway)
   unique_sizes <- sort(unique(pathway_sizes))
 
-  set.seed(12345)
-  seeds_null <- sample(100000, iter, replace = FALSE)
+  seeds_null <- if (is.null(seed)) {
+    sample(100000, iter, replace = FALSE)
+  } else {
+    withr::with_seed(seed, sample(100000, iter, replace = FALSE))
+  }
 
   compute_random_r <- function(r_all, size, i){
-    set.seed(seeds_null[i])
-    r <- sum(sample(r_all, size))
+    withr::with_seed(seeds_null[i], sum(sample(r_all, size)))
   }
   if (ncores == 1){
     r_random_list <- list()
@@ -122,6 +129,7 @@ Edge_Score2D <- function(MGI2D, pathway, background = NULL, pAdjMethod = "BH", p
       cl <- parallel::makeCluster(random_core)
       on.exit(parallel::stopCluster(cl), add = TRUE)
       parallel::clusterExport(cl, c("compute_random_r", "r_all", "iter", "seeds_null"), envir = environment())
+      parallel::clusterEvalQ(cl, requireNamespace("withr"))
       size_groups <- split(unique_sizes,
                            rep(seq_len(random_core), length.out = length(unique_sizes)))
       seeds_split <- split(seeds_null, rep(seq_len(random_core), length.out = length(seeds_null)))

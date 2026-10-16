@@ -45,11 +45,13 @@ Imports:
     parallel,
     patchwork,
     reshape2,
+    RhpcBLASctl,
     scales,
     stats,
     stringr,
     tibble,
-    utils
+    utils,
+    withr
 Suggests:
     BiocStyle,
     GSEABase,
